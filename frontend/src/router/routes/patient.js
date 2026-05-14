@@ -5,7 +5,7 @@ const meta = { roles: [ROLE.PATIENT] }
 export default [
   {
     path: '/patient',
-    component: () => import('@/layouts/DefaultLayout.vue'),
+    component: () => import('@/layouts/PatientLayout.vue'),
     meta,
     redirect: '/patient/home',
     children: [

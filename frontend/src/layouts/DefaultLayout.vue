@@ -1,14 +1,14 @@
 <script setup>
-import AppHeader from './components/AppHeader.vue'
 import AppSidebar from './components/AppSidebar.vue'
+import AppHeader from './components/AppHeader.vue'
 </script>
 
 <template>
-  <div class="layout">
-    <AppHeader />
-    <div class="layout-body">
-      <AppSidebar />
-      <main class="layout-main">
+  <div class="default-layout">
+    <AppSidebar />
+    <div class="default-layout__body">
+      <AppHeader />
+      <main class="default-layout__main">
         <router-view v-slot="{ Component, route }">
           <transition name="el-fade-in-linear" mode="out-in">
             <component :is="Component" :key="route.fullPath" />
@@ -20,11 +20,19 @@ import AppSidebar from './components/AppSidebar.vue'
 </template>
 
 <style scoped>
-.layout { height: 100vh; display: flex; flex-direction: column; }
-.layout-body { flex: 1; display: flex; min-height: 0; }
-.layout-main {
+.default-layout {
+  height: 100vh;
+  display: flex;
+  background: var(--app-bg-page);
+}
+.default-layout__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.default-layout__main {
   flex: 1;
   overflow: auto;
-  background: #f5f7fa;
 }
 </style>

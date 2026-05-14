@@ -1,7 +1,7 @@
-:root {
-  --app-header-height: 56px;
-  --app-sidebar-width: 220px;
-}
+@use './tokens.scss';
+@use './element-overrides.scss';
+
+// ============ Reset & Base ============
 
 html, body, #app {
   height: 100%;
@@ -13,24 +13,64 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', sans-serif;
-  background: #f5f7fa;
-  color: #303133;
+  font-size: var(--app-fs-body);
+  line-height: var(--app-lh-normal);
+  color: var(--app-text-2);
+  background-color: var(--app-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 a {
-  color: var(--el-color-primary);
+  color: var(--app-brand-500);
   text-decoration: none;
+  transition: color var(--app-transition-fast);
+}
+a:hover { color: var(--app-brand-600); }
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  color: var(--app-text-1);
+  font-weight: 600;
+  line-height: var(--app-lh-tight);
 }
 
+p { margin: 0; }
+
+// ============ 通用工具类 ============
+
 .page-container {
-  padding: 16px;
+  padding: var(--app-sp-6);
+  max-width: var(--app-content-max-width);
+  margin: 0 auto;
 }
 
 .page-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--app-sp-5);
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--app-sp-3);
+}
+
+// ============ 滚动条 ============
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--app-border-strong);
+  border-radius: var(--app-radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--app-text-4);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }
