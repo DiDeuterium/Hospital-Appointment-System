@@ -1,0 +1,203 @@
+// ============ Element Plus 组件级覆盖 ============
+// 让默认组件继承我们的设计 token，避免每页都重写
+// ===============================================
+
+// ---- Button ----
+.el-button {
+  height: 36px;
+  padding: 0 var(--app-sp-5);
+  font-size: var(--app-fs-body);
+  font-weight: 500;
+  border-radius: var(--app-radius-md);
+  transition: all var(--app-transition-fast);
+}
+.el-button--small {
+  height: 30px;
+  padding: 0 var(--app-sp-4);
+  font-size: var(--app-fs-caption);
+}
+.el-button--large {
+  height: 44px;
+  padding: 0 var(--app-sp-6);
+  font-size: var(--app-fs-h3);
+}
+// 边框按钮（default）的描边在新色板下更柔
+.el-button.is-plain,
+.el-button:not(.is-text):not(.is-link):not([class*='el-button--']) {
+  border-color: var(--app-border);
+  color: var(--app-text-2);
+}
+.el-button.is-plain:hover {
+  border-color: var(--app-brand-400);
+  color: var(--app-brand-600);
+  background: var(--app-brand-50);
+}
+
+// ---- Card ----
+.el-card {
+  border-radius: var(--app-radius-lg);
+  border-color: var(--app-border-light);
+  box-shadow: var(--app-shadow-xs);
+}
+.el-card__header {
+  padding: var(--app-sp-4) var(--app-sp-5);
+  border-color: var(--app-border-light);
+}
+.el-card__body {
+  padding: var(--app-sp-5);
+}
+
+// ---- Input / Select ----
+.el-input__wrapper,
+.el-textarea__inner {
+  border-radius: var(--app-radius-md);
+  box-shadow: 0 0 0 1px var(--app-border) inset;
+  transition: box-shadow var(--app-transition-fast);
+}
+.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--app-border-strong) inset;
+}
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--app-brand-500) inset !important;
+}
+.el-input__inner { color: var(--app-text-1); }
+.el-input__inner::placeholder { color: var(--app-text-4); }
+
+// ---- Table ----
+.el-table {
+  --el-table-border-color: var(--app-border-light);
+  --el-table-header-bg-color: var(--app-bg-subtle);
+  --el-table-row-hover-bg-color: var(--app-bg-hover);
+  --el-table-header-text-color: var(--app-text-3);
+  --el-table-text-color: var(--app-text-2);
+
+  font-size: var(--app-fs-body);
+  border-radius: var(--app-radius-md);
+}
+.el-table th.el-table__cell {
+  background-color: var(--app-bg-subtle) !important;
+  font-weight: 500;
+  color: var(--app-text-3);
+  border-bottom: 1px solid var(--app-border);
+}
+.el-table td.el-table__cell {
+  border-bottom: 1px solid var(--app-border-light);
+}
+// 去掉默认竖向边框（即使开了 border 属性）
+.el-table--border .el-table__cell {
+  border-right: none;
+}
+.el-table--border::after,
+.el-table::before {
+  background-color: var(--app-border-light) !important;
+}
+
+// ---- Tag ----
+.el-tag {
+  border-radius: var(--app-radius-sm);
+  border: none;
+  font-weight: 500;
+  height: 24px;
+  padding: 0 var(--app-sp-2);
+}
+.el-tag--small { height: 20px; font-size: var(--app-fs-tiny); }
+
+// ---- Dialog ----
+.el-dialog {
+  border-radius: var(--app-radius-xl);
+  overflow: hidden;
+}
+.el-dialog__header {
+  padding: var(--app-sp-5) var(--app-sp-6);
+  margin-right: 0;
+  border-bottom: 1px solid var(--app-border-light);
+}
+.el-dialog__title {
+  font-size: var(--app-fs-h2);
+  font-weight: 600;
+  color: var(--app-text-1);
+}
+.el-dialog__body {
+  padding: var(--app-sp-6);
+  color: var(--app-text-2);
+}
+.el-dialog__footer {
+  padding: var(--app-sp-4) var(--app-sp-6);
+  border-top: 1px solid var(--app-border-light);
+}
+
+// ---- Form ----
+.el-form-item__label {
+  color: var(--app-text-2);
+  font-weight: 500;
+  font-size: var(--app-fs-body);
+}
+.el-form-item {
+  margin-bottom: var(--app-sp-5);
+}
+
+// ---- Message / MessageBox ----
+.el-message { border-radius: var(--app-radius-md); }
+.el-message-box { border-radius: var(--app-radius-xl); }
+.el-message-box__title { font-size: var(--app-fs-h3); }
+
+// ---- Radio Button（角色 Tab、状态过滤用）----
+.el-radio-button__inner {
+  border-radius: 0;
+  border-color: var(--app-border);
+  color: var(--app-text-2);
+  font-weight: 500;
+  transition: all var(--app-transition-fast);
+}
+.el-radio-button__inner:hover { color: var(--app-brand-600); }
+.el-radio-button:first-child .el-radio-button__inner {
+  border-top-left-radius: var(--app-radius-md);
+  border-bottom-left-radius: var(--app-radius-md);
+}
+.el-radio-button:last-child .el-radio-button__inner {
+  border-top-right-radius: var(--app-radius-md);
+  border-bottom-right-radius: var(--app-radius-md);
+}
+.el-radio-button__original-radio:checked + .el-radio-button__inner {
+  background-color: var(--app-brand-500) !important;
+  border-color: var(--app-brand-500) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+// ---- Empty ----
+.el-empty__description { color: var(--app-text-3); }
+.el-empty__image svg { color: var(--app-border-strong); }
+
+// ---- Pagination ----
+.el-pagination {
+  --el-pagination-button-color: var(--app-text-2);
+  --el-pagination-hover-color: var(--app-brand-600);
+}
+
+// ---- DatePicker ----
+.el-date-editor.el-input,
+.el-date-editor.el-input__wrapper {
+  height: 36px;
+}
+
+// ---- Menu（如果某个页面仍用 el-menu）----
+.el-menu {
+  border-right: none !important;
+  background: transparent;
+}
+.el-menu-item {
+  height: 40px;
+  line-height: 40px;
+  border-radius: var(--app-radius-md);
+  margin: 2px var(--app-sp-3);
+  color: var(--app-text-2);
+}
+.el-menu-item:hover {
+  background: var(--app-bg-subtle);
+  color: var(--app-text-1);
+}
+.el-menu-item.is-active {
+  background: var(--app-brand-50);
+  color: var(--app-brand-700);
+}

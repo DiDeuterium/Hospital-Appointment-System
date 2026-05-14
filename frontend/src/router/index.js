@@ -61,10 +61,33 @@ const router = createRouter({
   scrollBehavior: () => ({ top: 0 })
 })
 
+// ============ 临时开发开关 ============
+// BYPASS_AUTH = true：跳过登录/权限校验，按访问路径自动注入对应角色的 mock 登录态，
+//                     便于 UI 设计阶段直接访问任意页面查看效果。
+// ⚠ 上线/联调前必须改回 false 并删除 mock 注入逻辑。
+const BYPASS_AUTH = true
+const MOCK_PROFILES = {
+  patient: { patientId: 0, realName: '开发用户' },
+  doctor: { docId: 'DEV001', docName: '开发医生' },
+  admin: { username: 'dev-admin' }
+}
+// ======================================
+
 router.beforeEach((to) => {
   const user = useUserStore()
   if (to.meta.title) {
     document.title = `${to.meta.title} - ${import.meta.env.VITE_APP_TITLE || '医院预约挂号系统'}`
+  }
+
+  if (BYPASS_AUTH) {
+    const targetRole =
+      to.path.startsWith('/patient') ? 'patient' :
+      to.path.startsWith('/doctor') ? 'doctor' :
+      to.path.startsWith('/admin') ? 'admin' : null
+    if (targetRole && (!user.isLoggedIn || (user.token === 'dev-mock' && user.role !== targetRole))) {
+      user.login({ role: targetRole, token: 'dev-mock', profile: MOCK_PROFILES[targetRole] })
+    }
+    return true
   }
 
   // 公共路由放行
