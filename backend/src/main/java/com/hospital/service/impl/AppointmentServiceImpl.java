@@ -13,9 +13,10 @@ import com.hospital.service.AppointmentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,18 +26,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final ScheduleMapper scheduleMapper;
     private final DoctorMapper doctorMapper;
     private final DepartmentMapper departmentMapper;
-    private final PatientMapper patientMapper;
 
     public AppointmentServiceImpl(AppointmentMapper appointmentMapper,
                                    ScheduleMapper scheduleMapper,
                                    DoctorMapper doctorMapper,
-                                   DepartmentMapper departmentMapper,
-                                   PatientMapper patientMapper) {
+                                   DepartmentMapper departmentMapper) {
         this.appointmentMapper = appointmentMapper;
         this.scheduleMapper = scheduleMapper;
         this.doctorMapper = doctorMapper;
         this.departmentMapper = departmentMapper;
-        this.patientMapper = patientMapper;
     }
 
     @Override
@@ -104,9 +102,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             wrapper.eq(Appointment::getStatus, status);
         }
         wrapper.orderByDesc(Appointment::getCreateTime);
-        List<Appointment> appointments = appointmentMapper.selectList(wrapper);
-
-        return appointments.stream().map(this::buildVO).collect(Collectors.toList());
+        return buildVOList(appointmentMapper.selectList(wrapper));
     }
 
     @Override
@@ -115,31 +111,58 @@ public class AppointmentServiceImpl implements AppointmentService {
         wrapper.eq(Appointment::getScheduleId, scheduleId)
                 .eq(Appointment::getStatus, 1);
         wrapper.orderByAsc(Appointment::getCreateTime);
-        List<Appointment> appointments = appointmentMapper.selectList(wrapper);
-
-        return appointments.stream().map(this::buildVO).collect(Collectors.toList());
+        return buildVOList(appointmentMapper.selectList(wrapper));
     }
 
     private AppointmentVO buildVO(Appointment appointment) {
-        AppointmentVO vo = new AppointmentVO();
-        vo.setApptId(appointment.getApptId());
-        vo.setScheduleId(appointment.getScheduleId());
-        vo.setStatus(appointment.getStatus());
-        vo.setCreateTime(appointment.getCreateTime());
+        return buildVOList(List.of(appointment)).get(0);
+    }
 
-        Schedule schedule = scheduleMapper.selectById(appointment.getScheduleId());
-        if (schedule != null) {
-            vo.setWorkDate(schedule.getWorkDate());
-            vo.setShift(schedule.getShift());
-            Doctor doctor = doctorMapper.selectById(schedule.getDocId());
-            if (doctor != null) {
-                vo.setDocName(doctor.getDocName());
-                Department dept = departmentMapper.selectById(doctor.getDeptId());
-                if (dept != null) {
-                    vo.setDeptName(dept.getDeptName());
+    private List<AppointmentVO> buildVOList(List<Appointment> appointments) {
+        if (appointments.isEmpty()) return List.of();
+
+        Set<Integer> scheduleIds = appointments.stream()
+                .map(Appointment::getScheduleId).collect(Collectors.toSet());
+        Map<Integer, Schedule> scheduleMap = new HashMap<>();
+        for (Schedule s : scheduleMapper.selectBatchIds(scheduleIds)) {
+            scheduleMap.put(s.getScheduleId(), s);
+        }
+
+        Set<String> docIds = scheduleMap.values().stream()
+                .map(Schedule::getDocId).collect(Collectors.toSet());
+        Map<String, Doctor> doctorMap = new HashMap<>();
+        for (Doctor d : doctorMapper.selectBatchIds(docIds)) {
+            doctorMap.put(d.getDocId(), d);
+        }
+
+        Set<String> deptIds = doctorMap.values().stream()
+                .map(Doctor::getDeptId).collect(Collectors.toSet());
+        Map<String, Department> deptMap = new HashMap<>();
+        for (Department d : departmentMapper.selectBatchIds(deptIds)) {
+            deptMap.put(d.getDeptId(), d);
+        }
+
+        return appointments.stream().map(appt -> {
+            AppointmentVO vo = new AppointmentVO();
+            vo.setApptId(appt.getApptId());
+            vo.setScheduleId(appt.getScheduleId());
+            vo.setStatus(appt.getStatus());
+            vo.setCreateTime(appt.getCreateTime());
+
+            Schedule schedule = scheduleMap.get(appt.getScheduleId());
+            if (schedule != null) {
+                vo.setWorkDate(schedule.getWorkDate());
+                vo.setShift(schedule.getShift());
+                Doctor doctor = doctorMap.get(schedule.getDocId());
+                if (doctor != null) {
+                    vo.setDocName(doctor.getDocName());
+                    Department dept = deptMap.get(doctor.getDeptId());
+                    if (dept != null) {
+                        vo.setDeptName(dept.getDeptName());
+                    }
                 }
             }
-        }
-        return vo;
+            return vo;
+        }).toList();
     }
 }

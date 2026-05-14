@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ScheduleService {
-    List<ScheduleVO> list(String deptId, LocalDate workDate, String shift);
+    List<ScheduleVO> list(String deptId, String docId, LocalDate workDate, String shift);
     Schedule getById(Integer scheduleId);
     void add(ScheduleRequest request);
     void update(Integer scheduleId, ScheduleRequest request);

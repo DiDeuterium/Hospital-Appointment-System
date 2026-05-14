@@ -23,6 +23,6 @@ public class ScheduleController {
             @RequestParam String deptId,
             @RequestParam(required = false) LocalDate workDate,
             @RequestParam(required = false) String shift) {
-        return Result.ok(scheduleService.list(deptId, workDate, shift));
+        return Result.ok(scheduleService.list(deptId, null, workDate, shift));
     }
 }
