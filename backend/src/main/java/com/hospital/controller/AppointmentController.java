@@ -37,3 +37,4 @@ public class AppointmentController {
         return Result.ok(appointmentService.listByPatient(patientId, status));
     }
 }
+    

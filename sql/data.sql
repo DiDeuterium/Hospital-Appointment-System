@@ -46,36 +46,36 @@ INSERT INTO department (dept_name, location, description) VALUES
 --   dept_id: 1=心内科 2=神经内科 3=骨科 4=儿科 5=皮肤科 6=眼科 7=耳鼻喉科 8=消化内科 9=呼吸内科 10=妇科
 -- ============================================
 INSERT INTO doctor (doc_name, gender, title, dept_id, password) VALUES
-('张伟',   'M', '主任医师',   1, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('李娜',   'F', '副主任医师', 1, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('王强',   'M', '主任医师',   2, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('刘芳',   'F', '主治医师',   2, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('陈刚',   'M', '主任医师',   3, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('杨丽',   'F', '副主任医师', 3, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('赵敏',   'F', '主任医师',   4, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('孙磊',   'M', '主治医师',   5, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('周杰',   'M', '主任医师',   6, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('吴秀英', 'F', '副主任医师', 7, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('郑涛',   'M', '主治医师',   8, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('钱红',   'F', '主任医师',   9, '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT');
+('张伟',   'M', '主任医师',   1, '$2b$12$e3hCt3nf0JgwOeo1.jSHK.yvqp97DUzHI9U34rYoZGEnnSwgMw8lG'),
+('李娜',   'F', '副主任医师', 1, '$2b$12$vdg1PZ04yLJ0NRWcyCM7fOdt3aSXnI/cyc.ayNthr7QOAzUmaXw5u'),
+('王强',   'M', '主任医师',   2, '$2b$12$yqjZVYC9DvRRkf9F21qNvOCW0R0ls.cfwsrHW0M.jL3K4kvrRFOhC'),
+('刘芳',   'F', '主治医师',   2, '$2b$12$MwB8F3JbB3wGwDJnSmirAuN71RikJNIus4yDv94AtQiXCiloMvlV.'),
+('陈刚',   'M', '主任医师',   3, '$2b$12$dM0jYsI5ei4xjjuk/aezTulel3bAzTSY4BkgrAH.SaB5AQjarE.HG'),
+('杨丽',   'F', '副主任医师', 3, '$2b$12$W5VFaDrDC/XIMZk5VdpxAezhpEPHeKO.El3GOtBuqBMf4Fj08vIZm'),
+('赵敏',   'F', '主任医师',   4, '$2b$12$sbxs21ZagSbK746TSWI8hOzxQxegFJgBzPrt/vRHSnxAwydFHjRd.'),
+('孙磊',   'M', '主治医师',   5, '$2b$12$V76JLAoANt7olI2OWLYw3uGiAS3Gy3hE91jC9So9U0dMFSsvFyjLK'),
+('周杰',   'M', '主任医师',   6, '$2b$12$IIUBQ9S8Xrk06z5qgBdqEO.2WCW0awQooKLobaS7K1HhxOWh.fJXK'),
+('吴秀英', 'F', '副主任医师', 7, '$2b$12$LagKSFW58AmkDsrigA7FO.K9MCtM4NxrBDBCstu6G3V.EFT7RPIDe'),
+('郑涛',   'M', '主治医师',   8, '$2b$12$oiVk8rjLeA256wWVic4FiuTRAvwPj2vjtpWTUC7XkmtMzis/mwVoK'),
+('钱红',   'F', '主任医师',   9, '$2b$12$2Ho86iz.D0xVsZf5ug.R4eP5J5/Q.D9o9Pabm5O6bXlvewyOqNGhi');
 
 -- ============================================
 -- 3. 患者表 (12 条, ID 1-12)
 --   密码同样为占位值
 -- ============================================
 INSERT INTO patient (id_card, real_name, gender, phone, password) VALUES
-('110101199001011234', '赵小明', 'M', '13800001111', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('110101199205202345', '钱小红', 'F', '13800002222', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('310102198803153456', '孙大伟', 'M', '13900003333', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('310102199511204567', '李美玲', 'F', '13900004444', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('440103197807256789', '周文博', 'M', '13600005555', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('440103199209108901', '吴丽华', 'F', '13600006666', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('330106198512251112', '郑国强', 'M', '13700007777', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('330106199608062223', '王秀兰', 'F', '13700008888', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('510104199103173334', '冯建军', 'M', '13500009999', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('510104199812084445', '陈玉芬', 'F', '13500001110', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('320105198706185556', '蒋明辉', 'M', '13300001111', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT'),
-('320105199404096667', '沈秀英', 'F', '13300002222', '$2a$10$PLACEHOLDER_NEED_REAL_BCRYPT');
+('110101199001011234', '赵小明', 'M', '13800001111', '$2b$12$c3H9qliZ80KkuevWvfliS.HNvIePFjkJc3/keZFXk8zhMh4hmABsC'),
+('110101199205202345', '钱小红', 'F', '13800002222', '$2b$12$68SJ.nD/kul/WOHWbsTBYu.abpywXR05bPBy2K8KZKjCGTFVFz4Qi'),
+('310102198803153456', '孙大伟', 'M', '13900003333', '$2b$12$c3lGJp.zFcm713/jvd0.A.4HGydX.iAffVf4aNOpljDODODJvuAR2'),
+('310102199511204567', '李美玲', 'F', '13900004444', '$2b$12$fkFex9GaT0AODKBWFwKEeeOtdGQyn9527ZbIS1YB2hlNDHjOk2NrK'),
+('440103197807256789', '周文博', 'M', '13600005555', '$2b$12$O6wk2eIzv2DgWWw7sa3RxOsx5BF4wBTvKbuChJzR5HT6UpRRz8UmW'),
+('440103199209108901', '吴丽华', 'F', '13600006666', '$2b$12$WGMCeaLSyfkcS9Wex059.O1YsiG7oZ4F5/m8OHByOPWJ0JgZdcb2O'),
+('330106198512251112', '郑国强', 'M', '13700007777', '$2b$12$nH6D01tCFApBeUbtuwmymeQd5PGurR4GQmChJgTwJswVqvQ943hVS'),
+('330106199608062223', '王秀兰', 'F', '13700008888', '$2b$12$XUf0hqmueZJ6vhkpGcVFQeR1YCpratr5RMifSP2Vzoc3sYHbHF6kO'),
+('510104199103173334', '冯建军', 'M', '13500009999', '$2b$12$NbI6zelOVY9RmxULZrDlOOp/sR8qIgWIPb2jpjBAJP52czy25R9BS'),
+('510104199812084445', '陈玉芬', 'F', '13500001110', '$2b$12$493iGnB/Fa2VvM3BU31UoekbUtsge3TfB7AqeHiu2bmmxcQ4cSvsa'),
+('320105198706185556', '蒋明辉', 'M', '13300001111', '$2b$12$gv187YZz1TEGnLUcAa9/tO.n7ql8hUNwTY7hai3xynTeRrPqgBQl2'),
+('320105199404096667', '沈秀英', 'F', '13300002222', '$2b$12$FGpK3CRSE/FFCAGFQlm11u33P64ZGwN4lkw2WGFCE47ohBKQ/Nd.O');
 
 -- ============================================
 -- 4. 排班表 (16 条, ID 1-16)
