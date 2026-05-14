@@ -1,0 +1,54 @@
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { ROLE } from '@/utils/constants'
+import { getToken, setToken, getUser, setUser, clearAuth } from '@/utils/storage'
+
+/**
+ * 登录态：
+ *   role     角色（'patient' | 'doctor' | 'admin'）
+ *   token    后端返回的 token
+ *   profile  用户信息（不同角色字段不同：patient: { patientId, realName }；doctor: { docId, docName }；admin: { username }）
+ */
+export const useUserStore = defineStore('user', () => {
+  const token = ref(getToken())
+  const stored = getUser()
+  const role = ref(stored?.role || '')
+  const profile = ref(stored?.profile || null)
+
+  const isLoggedIn = computed(() => !!token.value && !!role.value)
+  const displayName = computed(() => {
+    if (!profile.value) return ''
+    return profile.value.realName || profile.value.docName || profile.value.username || ''
+  })
+
+  function login({ role: r, token: t, profile: p }) {
+    role.value = r
+    token.value = t
+    profile.value = p
+    setToken(t)
+    setUser({ role: r, profile: p })
+  }
+
+  function logout() {
+    role.value = ''
+    token.value = ''
+    profile.value = null
+    clearAuth()
+  }
+
+  function isRole(...roles) {
+    return roles.includes(role.value)
+  }
+
+  return {
+    token,
+    role,
+    profile,
+    isLoggedIn,
+    displayName,
+    login,
+    logout,
+    isRole,
+    ROLE
+  }
+})
