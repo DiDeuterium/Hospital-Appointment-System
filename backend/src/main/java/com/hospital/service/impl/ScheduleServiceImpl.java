@@ -35,8 +35,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public List<ScheduleVO> list(String deptId, LocalDate workDate, String shift) {
+    public List<ScheduleVO> list(String deptId, String docId, LocalDate workDate, String shift) {
         LambdaQueryWrapper<Schedule> wrapper = new LambdaQueryWrapper<>();
+
+        if (docId != null && !docId.isBlank()) {
+            wrapper.eq(Schedule::getDocId, docId);
+        }
 
         // Build doctor IDs for the given department
         if (deptId != null && !deptId.isBlank()) {

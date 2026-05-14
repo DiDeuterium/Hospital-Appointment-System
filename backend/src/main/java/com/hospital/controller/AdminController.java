@@ -103,7 +103,7 @@ public class AdminController {
     public Result<List<ScheduleVO>> listSchedules(
             @RequestParam(required = false) String docId,
             @RequestParam(required = false) LocalDate workDate) {
-        return Result.ok(scheduleService.list(null, workDate, null));
+        return Result.ok(scheduleService.list(null, docId, workDate, null));
     }
 
     @PostMapping("/schedules")

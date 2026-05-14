@@ -5,7 +5,6 @@ import com.hospital.dto.request.DoctorLoginRequest;
 import com.hospital.dto.response.AppointmentVO;
 import com.hospital.dto.response.DoctorScheduleVO;
 import com.hospital.dto.response.LoginResponse;
-import com.hospital.entity.Schedule;
 import com.hospital.service.AppointmentService;
 import com.hospital.service.DoctorService;
 import com.hospital.service.ScheduleService;
@@ -40,10 +39,8 @@ public class DoctorController {
     public Result<List<DoctorScheduleVO>> getSchedules(
             @PathVariable String docId,
             @RequestParam(required = false) LocalDate workDate) {
-        // Use ScheduleService to list and filter by docId, then map to DoctorScheduleVO
-        var schedules = scheduleService.list(null, workDate, null);
+        var schedules = scheduleService.list(null, docId, workDate, null);
         List<DoctorScheduleVO> vos = schedules.stream()
-                .filter(s -> s.getDocId().equals(docId))
                 .map(s -> {
                     DoctorScheduleVO vo = new DoctorScheduleVO();
                     vo.setScheduleId(s.getScheduleId());
