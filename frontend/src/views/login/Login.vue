@@ -162,9 +162,12 @@ async function handleSubmit() {
           >登 录</el-button>
         </el-form>
 
-        <div v-if="role === ROLE.PATIENT" class="login-card__footer">
-          还没有账号？
-          <router-link to="/register">立即注册</router-link>
+        <!-- 固定底部区域，切换角色不引起布局位移 -->
+        <div class="login-card__footer">
+          <div v-if="role === ROLE.PATIENT">
+            还没有账号？
+            <router-link to="/register">立即注册</router-link>
+          </div>
         </div>
       </div>
     </main>
@@ -323,7 +326,20 @@ async function handleSubmit() {
 }
 .login-card__roles :deep(.el-radio-button__inner) {
   width: 100%;
-  padding: 0 var(--app-sp-3);
+  height: 48px;
+  line-height: 48px;
+  font-size: var(--app-fs-h3);
+  font-weight: 500;
+  padding: 0;
+  border-radius: 0;
+}
+.login-card__roles :deep(.el-radio-button:first-child .el-radio-button__inner) {
+  border-top-left-radius: var(--app-radius-md);
+  border-bottom-left-radius: var(--app-radius-md);
+}
+.login-card__roles :deep(.el-radio-button:last-child .el-radio-button__inner) {
+  border-top-right-radius: var(--app-radius-md);
+  border-bottom-right-radius: var(--app-radius-md);
 }
 
 .login-card__submit {
@@ -337,6 +353,7 @@ async function handleSubmit() {
   text-align: center;
   font-size: var(--app-fs-caption);
   color: var(--app-text-3);
+  min-height: 20px;   /* 即使 v-if 不渲染也占位，避免 layout shift */
 }
 .login-card__footer a {
   color: var(--app-brand-600);

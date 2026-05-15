@@ -2,24 +2,37 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { listDoctorsByDept } from '@/api/department'
-import { GENDER_LABEL } from '@/utils/constants'
+import { listDepartments } from '@/api/department'
+import PageHeader from '@/components/PageHeader.vue'
+import DoctorCard from '@/components/DoctorCard.vue'
 
 const route = useRoute()
 const router = useRouter()
+const deptId = route.params.deptId
 const list = ref([])
+const deptName = ref('')
 const loading = ref(false)
 
 async function load() {
   loading.value = true
   try {
-    list.value = await listDoctorsByDept(route.params.deptId)
-  } catch (e) {} finally {
+    const [doctors, depts] = await Promise.all([
+      listDoctorsByDept(deptId),
+      listDepartments()
+    ])
+    list.value = doctors
+    const found = depts.find(d => d.deptId == deptId)
+    deptName.value = found?.deptName || `科室 ${deptId}`
+  } catch { /* 静默 */ } finally {
     loading.value = false
   }
 }
 
-function viewSchedules() {
-  router.push({ name: 'PatientSchedules', params: { deptId: route.params.deptId } })
+function viewDetail(doc) {
+  router.push({ name: 'PatientDoctorDetail', params: { deptId, docId: doc.docId } })
+}
+function viewSchedules(doc) {
+  router.push({ name: 'PatientSchedules', params: { deptId } })
 }
 
 onMounted(load)
@@ -27,17 +40,37 @@ onMounted(load)
 
 <template>
   <div class="page-container">
-    <div class="page-toolbar">
-      <el-button text @click="router.back()">← 返回科室</el-button>
-      <el-button type="primary" @click="viewSchedules">查看排班号源</el-button>
+    <PageHeader
+      :title="deptName"
+      :subtitle="'共 ' + list.length + ' 位医生'"
+      :breadcrumbs="[{ label: '首页', to: '/patient/home' }, { label: '选择科室', to: '/patient/departments' }, { label: deptName }]"
+    />
+
+    <div v-loading="loading" class="doctors-grid">
+      <el-row :gutter="16">
+        <el-col
+          v-for="d in list"
+          :key="d.docId"
+          :xs="24"
+          :sm="12"
+          :lg="8"
+          style="margin-bottom:16px"
+        >
+          <DoctorCard
+            :doctor="d"
+            @view-detail="viewDetail"
+            @view-schedules="viewSchedules"
+          />
+        </el-col>
+      </el-row>
     </div>
-    <el-table :data="list" v-loading="loading" border>
-      <el-table-column prop="docId" label="工号" width="120" />
-      <el-table-column prop="docName" label="姓名" width="120" />
-      <el-table-column label="性别" width="80">
-        <template #default="{ row }">{{ GENDER_LABEL[row.gender] || '-' }}</template>
-      </el-table-column>
-      <el-table-column prop="title" label="职称" />
-    </el-table>
   </div>
 </template>
+
+<style scoped>
+.page-container {
+  max-width: var(--app-content-max-width);
+  margin: 0 auto;
+  padding: var(--app-sp-6) var(--app-sp-6) var(--app-sp-12);
+}
+</style>
