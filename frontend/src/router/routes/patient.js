@@ -13,25 +13,49 @@ export default [
         path: 'home',
         name: 'PatientHome',
         component: () => import('@/views/patient/Home.vue'),
-        meta: { ...meta, title: '科室浏览', icon: 'OfficeBuilding' }
+        meta: { ...meta, title: '首页' }
       },
       {
-        path: 'doctors/:deptId',
+        path: 'departments',
+        name: 'PatientDepartments',
+        component: () => import('@/views/patient/Departments.vue'),
+        meta: { ...meta, title: '选择科室' }
+      },
+      {
+        path: 'departments/:deptId/doctors',
         name: 'PatientDoctors',
         component: () => import('@/views/patient/Doctors.vue'),
         meta: { ...meta, title: '医生列表', hidden: true }
       },
       {
-        path: 'schedules/:deptId',
+        path: 'departments/:deptId/doctors/:docId',
+        name: 'PatientDoctorDetail',
+        component: () => import('@/views/patient/DoctorDetail.vue'),
+        meta: { ...meta, title: '医生详情', hidden: true }
+      },
+      {
+        path: 'departments/:deptId/schedules',
         name: 'PatientSchedules',
         component: () => import('@/views/patient/Schedules.vue'),
-        meta: { ...meta, title: '排班号源', hidden: true }
+        meta: { ...meta, title: '排班选号', hidden: true }
+      },
+      {
+        path: 'book/confirm',
+        name: 'PatientBookConfirm',
+        component: () => import('@/views/patient/BookConfirm.vue'),
+        meta: { ...meta, title: '挂号确认', hidden: true }
+      },
+      {
+        path: 'book/success',
+        name: 'PatientBookSuccess',
+        component: () => import('@/views/patient/BookSuccess.vue'),
+        meta: { ...meta, title: '挂号成功', hidden: true }
       },
       {
         path: 'appointments',
         name: 'PatientAppointments',
         component: () => import('@/views/patient/Appointments.vue'),
-        meta: { ...meta, title: '我的预约', icon: 'Calendar' }
+        meta: { ...meta, title: '我的预约' }
       }
     ]
   }
