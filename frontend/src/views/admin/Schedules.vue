@@ -1,24 +1,20 @@
 <script setup>
 import { onMounted, ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  listSchedules,
-  createSchedule,
-  updateSchedule,
-  deleteSchedule
-} from '@/api/schedule'
+import { listSchedules, createSchedule, updateSchedule, deleteSchedule } from '@/api/schedule'
 import { listDoctors } from '@/api/doctor'
 import { SHIFT_OPTIONS } from '@/utils/constants'
+import PageHeader from '@/components/PageHeader.vue'
+import StatusTag from '@/components/StatusTag.vue'
+import AppIcon from '@/components/AppIcon.vue'
 
 const list = ref([])
 const doctors = ref([])
 const loading = ref(false)
-
 const filters = reactive({ docId: '', workDate: '' })
 
 const dialog = reactive({
-  visible: false,
-  isEdit: false,
+  visible: false, isEdit: false,
   form: { scheduleId: null, docId: '', workDate: '', shift: '上午', totalQuota: 30 }
 })
 const formRef = ref()
@@ -32,34 +28,21 @@ const rules = {
 async function load() {
   loading.value = true
   try {
-    // deptId 必须传（后端 @RequestParam required=true），admin 查全院时传空字符串
     const params = { deptId: '' }
     if (filters.docId) params.docId = filters.docId
     if (filters.workDate) params.workDate = filters.workDate
     list.value = await listSchedules(params)
-  } catch (e) {} finally {
-    loading.value = false
-  }
+  } catch {} finally { loading.value = false }
 }
-
-async function loadDoctors() {
-  doctors.value = await listDoctors()
-}
-
-function docName(docId) {
-  return doctors.value.find(d => d.docId === docId)?.docName || docId
-}
+async function loadDoctors() { doctors.value = await listDoctors({ deptId: '' }) }
 
 function openCreate() {
   dialog.isEdit = false
   dialog.form = { scheduleId: null, docId: '', workDate: '', shift: '上午', totalQuota: 30 }
   dialog.visible = true
 }
-function openEdit(row) {
-  dialog.isEdit = true
-  dialog.form = { ...row }
-  dialog.visible = true
-}
+function openEdit(row) { dialog.isEdit = true; dialog.form = { ...row }; dialog.visible = true }
+
 async function submit() {
   await formRef.value.validate()
   try {
@@ -72,101 +55,103 @@ async function submit() {
       await createSchedule(rest)
       ElMessage.success('发布成功')
     }
-    dialog.visible = false
-    load()
-  } catch (e) {}
+    dialog.visible = false; load()
+  } catch {}
 }
 async function remove(row) {
-  await ElMessageBox.confirm('删除该排班？若已有患者预约将无法删除', '提示', { type: 'warning' })
   try {
+    await ElMessageBox.confirm('确定删除该排班？若已有预约将无法删除', '提示', { type: 'warning' })
     await deleteSchedule(row.scheduleId)
-    ElMessage.success('已删除')
-    load()
-  } catch (e) {}
+    ElMessage.success('已删除'); load()
+  } catch {}
 }
 
-onMounted(() => {
-  loadDoctors()
-  load()
-})
+onMounted(() => { loadDoctors(); load() })
 </script>
 
 <template>
   <div class="page-container">
-    <div class="page-toolbar">
-      <h3 style="margin:0">排班发布</h3>
-      <div style="display:flex;gap:8px;align-items:center">
-        <el-select
-          v-model="filters.docId"
-          placeholder="按医生筛选"
-          clearable
-          style="width:180px"
-          @change="load"
-        >
-          <el-option v-for="d in doctors" :key="d.docId" :label="d.docName" :value="d.docId" />
-        </el-select>
-        <el-date-picker
-          v-model="filters.workDate"
-          type="date"
-          value-format="YYYY-MM-DD"
-          placeholder="按日期筛选"
-          clearable
-          @change="load"
-        />
-        <el-button type="primary" @click="openCreate">发布排班</el-button>
-      </div>
+    <PageHeader title="排班管理" :subtitle="'共 ' + list.length + ' 条排班'">
+      <template #extra>
+        <el-button size="large" type="primary" @click="openCreate">发布排班</el-button>
+      </template>
+    </PageHeader>
+
+    <div class="toolbar">
+      <el-select v-model="filters.docId" placeholder="按医生筛选" clearable size="large" @change="load" class="toolbar__sel">
+        <el-option v-for="d in doctors" :key="d.docId" :label="d.docName" :value="d.docId" />
+      </el-select>
+      <el-date-picker v-model="filters.workDate" type="date" value-format="YYYY-MM-DD" placeholder="按日期筛选" clearable size="large" @change="load" />
+      <el-button size="large" @click="filters.docId = ''; filters.workDate = ''; load()">清除</el-button>
     </div>
 
-    <el-table :data="list" v-loading="loading" border>
-      <el-table-column prop="scheduleId" label="排班号" width="100" />
-      <el-table-column label="医生">
-        <template #default="{ row }">{{ row.docName || docName(row.docId) }}</template>
-      </el-table-column>
-      <el-table-column prop="workDate" label="日期" width="120" />
-      <el-table-column prop="shift" label="时段" width="80" />
-      <el-table-column prop="totalQuota" label="总号源" width="100" />
-      <el-table-column prop="restQuota" label="剩余" width="100" />
-      <el-table-column label="操作" width="180" fixed="right">
-        <template #default="{ row }">
-          <el-button size="small" @click="openEdit(row)">编辑</el-button>
-          <el-button size="small" type="danger" @click="remove(row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div v-loading="loading" class="table-wrap">
+      <table class="st-table" v-if="list.length">
+        <thead>
+          <tr><th>医生</th><th>日期</th><th>时段</th><th>总号源</th><th>剩余</th><th>状态</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="s in list" :key="s.scheduleId">
+            <td class="st-table__name">{{ s.docName }}</td>
+            <td>{{ s.workDate }}</td>
+            <td>{{ s.shift }}</td>
+            <td>{{ s.totalQuota }}</td>
+            <td>{{ s.restQuota }}</td>
+            <td>
+              <StatusTag :type="s.restQuota <= 0 ? 'danger' : s.restQuota < s.totalQuota * 0.3 ? 'warning' : 'success'" size="small">
+                {{ s.restQuota <= 0 ? '约满' : s.restQuota < s.totalQuota * 0.3 ? '紧张' : '充足' }}
+              </StatusTag>
+            </td>
+            <td class="st-table__actions">
+              <el-button size="small" @click="openEdit(s)">编辑</el-button>
+              <el-button size="small" type="danger" plain @click="remove(s)">删除</el-button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-else class="empty">暂无排班</div>
+    </div>
 
-    <el-dialog
-      v-model="dialog.visible"
-      :title="dialog.isEdit ? '修改排班' : '发布排班'"
-      width="480px"
-    >
-      <el-form ref="formRef" :model="dialog.form" :rules="rules" label-width="90px">
+    <!-- 弹窗 -->
+    <el-dialog v-model="dialog.visible" :title="dialog.isEdit ? '修改排班' : '发布排班'" width="480px">
+      <el-form ref="formRef" :model="dialog.form" :rules="rules" label-position="top">
         <el-form-item label="医生" prop="docId">
-          <el-select v-model="dialog.form.docId" placeholder="选择医生" style="width:100%" :disabled="dialog.isEdit">
+          <el-select v-model="dialog.form.docId" placeholder="选择医生" size="large" :disabled="dialog.isEdit" style="width:100%">
             <el-option v-for="d in doctors" :key="d.docId" :label="d.docName + ' (' + d.docId + ')'" :value="d.docId" />
           </el-select>
         </el-form-item>
         <el-form-item label="日期" prop="workDate">
-          <el-date-picker
-            v-model="dialog.form.workDate"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="选择日期"
-            style="width:100%"
-          />
+          <el-date-picker v-model="dialog.form.workDate" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" size="large" style="width:100%" />
         </el-form-item>
         <el-form-item label="时段" prop="shift">
           <el-radio-group v-model="dialog.form.shift">
-            <el-radio v-for="s in SHIFT_OPTIONS" :key="s.value" :value="s.value">{{ s.label }}</el-radio>
+            <el-radio-button v-for="s in SHIFT_OPTIONS" :key="s.value" :value="s.value">{{ s.label }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="号源总数" prop="totalQuota">
-          <el-input-number v-model="dialog.form.totalQuota" :min="1" :max="200" />
+          <el-input-number v-model="dialog.form.totalQuota" :min="1" :max="200" size="large" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialog.visible = false">取消</el-button>
-        <el-button type="primary" @click="submit">确定</el-button>
+        <el-button size="large" @click="dialog.visible = false">取消</el-button>
+        <el-button size="large" type="primary" @click="submit">确定</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
+
+<style scoped>
+.page-container { max-width: var(--app-content-max-width); margin: 0 auto; padding: var(--app-sp-6) var(--app-sp-6) var(--app-sp-12); }
+.toolbar { display: flex; gap: var(--app-sp-3); margin-bottom: var(--app-sp-6); flex-wrap: wrap; }
+.toolbar__sel { width: 220px; }
+
+.table-wrap { background: var(--app-bg-elevated); border: 1px solid var(--app-border-light); border-radius: var(--app-radius-lg); overflow: hidden; }
+.st-table { width: 100%; border-collapse: collapse; font-size: var(--app-fs-body); }
+.st-table th { text-align: left; padding: var(--app-sp-3) var(--app-sp-5); background: var(--app-bg-subtle); color: var(--app-text-3); font-weight: 500; font-size: var(--app-fs-caption); border-bottom: 1px solid var(--app-border); }
+.st-table td { padding: var(--app-sp-3) var(--app-sp-5); border-bottom: 1px solid var(--app-border-light); color: var(--app-text-2); }
+.st-table tr:last-child td { border-bottom: none; }
+.st-table tr:hover td { background: var(--app-bg-hover); }
+.st-table__name { font-weight: 500; color: var(--app-text-1); }
+.st-table__actions { white-space: nowrap; }
+.empty { text-align: center; padding: var(--app-sp-8); color: var(--app-text-3); font-size: var(--app-fs-caption); }
+</style>

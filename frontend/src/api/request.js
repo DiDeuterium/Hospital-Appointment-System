@@ -19,7 +19,7 @@ service.interceptors.request.use(
     const isPublic = url.includes('/login') || url.includes('/register')
     if (!isPublic) {
       const token = getToken()
-      if (token) config.headers.token = token
+      if (token) config.headers.Authorization = 'Bearer ' + token
     }
     return config
   },

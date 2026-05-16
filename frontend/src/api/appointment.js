@@ -12,5 +12,5 @@ export function cancelAppointment(apptId) {
 
 // 我的预约
 export function listMyAppointments(patientId, params) {
-  return request.get(`/patients/${patientId}/appointments`, { params })
+  return request.get(`/appointments/patients/${patientId}`, { params })
 }
