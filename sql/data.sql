@@ -62,21 +62,21 @@ INSERT INTO doctor (doc_name, gender, title, dept_id, password) VALUES
 
 -- ============================================
 -- 3. 患者表 (12 条, ID 1-12)
---   密码同样为占位值
+--   密码为123456的哈希值
 -- ============================================
 INSERT INTO patient (id_card, real_name, gender, phone, password) VALUES
-('110101199001011234', '赵小明', 'M', '13800001111', '$2b$12$c3H9qliZ80KkuevWvfliS.HNvIePFjkJc3/keZFXk8zhMh4hmABsC'),
-('110101199205202345', '钱小红', 'F', '13800002222', '$2b$12$68SJ.nD/kul/WOHWbsTBYu.abpywXR05bPBy2K8KZKjCGTFVFz4Qi'),
-('310102198803153456', '孙大伟', 'M', '13900003333', '$2b$12$c3lGJp.zFcm713/jvd0.A.4HGydX.iAffVf4aNOpljDODODJvuAR2'),
-('310102199511204567', '李美玲', 'F', '13900004444', '$2b$12$fkFex9GaT0AODKBWFwKEeeOtdGQyn9527ZbIS1YB2hlNDHjOk2NrK'),
-('440103197807256789', '周文博', 'M', '13600005555', '$2b$12$O6wk2eIzv2DgWWw7sa3RxOsx5BF4wBTvKbuChJzR5HT6UpRRz8UmW'),
-('440103199209108901', '吴丽华', 'F', '13600006666', '$2b$12$WGMCeaLSyfkcS9Wex059.O1YsiG7oZ4F5/m8OHByOPWJ0JgZdcb2O'),
-('330106198512251112', '郑国强', 'M', '13700007777', '$2b$12$nH6D01tCFApBeUbtuwmymeQd5PGurR4GQmChJgTwJswVqvQ943hVS'),
-('330106199608062223', '王秀兰', 'F', '13700008888', '$2b$12$XUf0hqmueZJ6vhkpGcVFQeR1YCpratr5RMifSP2Vzoc3sYHbHF6kO'),
-('510104199103173334', '冯建军', 'M', '13500009999', '$2b$12$NbI6zelOVY9RmxULZrDlOOp/sR8qIgWIPb2jpjBAJP52czy25R9BS'),
-('510104199812084445', '陈玉芬', 'F', '13500001110', '$2b$12$493iGnB/Fa2VvM3BU31UoekbUtsge3TfB7AqeHiu2bmmxcQ4cSvsa'),
-('320105198706185556', '蒋明辉', 'M', '13300001111', '$2b$12$gv187YZz1TEGnLUcAa9/tO.n7ql8hUNwTY7hai3xynTeRrPqgBQl2'),
-('320105199404096667', '沈秀英', 'F', '13300002222', '$2b$12$FGpK3CRSE/FFCAGFQlm11u33P64ZGwN4lkw2WGFCE47ohBKQ/Nd.O');
+('110101199001011234', '赵小明', 'M', '13800001111', '$2b$10$/alhAc1F2S6TE.yPV3Y37.qcaUwhcLP5CVwF./spiiChb0dB7KdeS'),
+('110101199205202345', '钱小红', 'F', '13800002222', '$2b$10$0Eiyfl3YSmncbHSmLgXZtuEJrLbX6k16Rb3JVHCEmoNd5lQy5pJ5O'),
+('310102198803153456', '孙大伟', 'M', '13900003333', '$2b$10$90y2eCkSK9uHw4XRcsJ0..ZVivw4rwsbadD3NOPysdSvaeT2BpXye'),
+('310102199511204567', '李美玲', 'F', '13900004444', '$2b$10$1hg5.LJZ.vlC/0Dc0QiX5uFZi9o5w7fxphY2Htid4kv09xNgJfLma'),
+('440103197807256789', '周文博', 'M', '13600005555', '$2b$10$mZ06NZiZ3A.vrG5rKF/g3uVaiuMl/ohqSC.X7XAmFKx2tjjIZNmbS'),
+('440103199209108901', '吴丽华', 'F', '13600006666', '$2b$10$m7KUajd4.WF.JWvDAvAs0uRz1S0liB6WKx.ZNUOX94kKIYncBaQ46'),
+('330106198512251112', '郑国强', 'M', '13700007777', '$2b$10$ZHVCj1SLin3Rt6/LWzouc.QZDCTaS.NmRmZJCq5ckZDS9B1ip3kMu'),
+('330106199608062223', '王秀兰', 'F', '13700008888', '$2b$10$jLaaoN41LzNeOT5DVTmZ2OJRoJf/GoArIzrFBuDZubGR0vupwFqdm'),
+('510104199103173334', '冯建军', 'M', '13500009999', '$2b$10$TB97rGxCpggj.6yRKmdol.pjdfaHhjP8xSM7Hgz/hDSaVatjNgWdy'),
+('510104199812084445', '陈玉芬', 'F', '13500001110', '$2b$10$MjvA7KmskWzh9c/QzLnJ6u1cLKOY3tm/Pz6KiL2EZgq1qz4evQG/6'),
+('320105198706185556', '蒋明辉', 'M', '13300001111', '$2b$10$.Xs3E.jI7jTD4yQtJxXsJeUe28xKx/sdZLCuDopfhyUbfZhHs2KE6'),
+('320105199404096667', '沈秀英', 'F', '13300002222', '$2b$10$h2AC4.HsLyWKEKFR5rWTTOU.vxa8LdioeWwVPFk0iukZwYVkSYS3i');
 
 -- ============================================
 -- 4. 排班表 (16 条, ID 1-16)
