@@ -45,7 +45,9 @@ async function doBook() {
     })
     stashResult(res)
     router.replace({ name: 'PatientBookSuccess' })
-  } catch { /* 拦截器已弹错误 */ } finally {
+  } catch (e) {
+    ElMessage.error(e?.message || '挂号失败，请稍后重试')
+  } finally {
     loading.value = false
   }
 }
