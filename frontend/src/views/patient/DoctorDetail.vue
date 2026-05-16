@@ -9,7 +9,6 @@ import PageHeader from '@/components/PageHeader.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import QuotaBar from '@/components/QuotaBar.vue'
 import SectionCard from '@/components/SectionCard.vue'
-import DateTabs from '@/components/DateTabs.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -20,7 +19,6 @@ const doctor = ref(null)
 const deptName = ref('')
 const schedules = ref([])
 const loading = ref(false)
-const selectedDate = ref(formatDate(new Date()))
 
 // 近 7 天日期列表（用于构造网格并留满 7 天）
 const dateRange = computed(() => {
@@ -59,12 +57,12 @@ async function load() {
       listSchedules({ deptId }),
       listDepartments()
     ])
-    const found = doctors.find(d => d.docId == docId)
+    const found = doctors.find(d => String(d.docId) === String(docId))
     if (found) doctor.value = found
-    const dept = depts.find(d => d.deptId == deptId)
+    const dept = depts.find(d => String(d.deptId) === String(deptId))
     deptName.value = dept?.deptName || `科室 ${deptId}`
     // 只保留本医生的排班
-    schedules.value = (allSchedules || []).filter(s => s.docId == docId)
+    schedules.value = (allSchedules || []).filter(s => String(s.docId) === String(docId))
   } catch { /* 静默 */ } finally {
     loading.value = false
   }
@@ -107,11 +105,8 @@ onMounted(load)
       <div class="profile__badge">{{ deptIcon(deptName) }}</div>
     </section>
 
-    <!-- 近 7 天可预约排班（日历式网格） -->
+    <!-- 近 7 天可预约排班（日历式网格，固定展示今天起未来 7 天） -->
     <SectionCard title="近 7 天排班" class="section-gap">
-      <template #extra>
-        <DateTabs v-model="selectedDate" />
-      </template>
 
       <div v-loading="loading" class="cal">
         <div class="cal__header">
@@ -124,7 +119,7 @@ onMounted(load)
             <div
               v-if="g.am"
               class="cal__cell"
-              :class="{ 'is-selected': selectedDate === g.date }"
+              :class="{ 'is-today': g.date === dateRange[0] }"
               @click="gotoBook(g.am)"
             >
               <QuotaBar :total="g.am.totalQuota" :rest="g.am.restQuota" />
@@ -139,7 +134,7 @@ onMounted(load)
             <div
               v-if="g.pm"
               class="cal__cell"
-              :class="{ 'is-selected': selectedDate === g.date }"
+              :class="{ 'is-today': g.date === dateRange[0] }"
               @click="gotoBook(g.pm)"
             >
               <QuotaBar :total="g.pm.totalQuota" :rest="g.pm.restQuota" />
@@ -257,6 +252,10 @@ onMounted(load)
   padding: var(--app-sp-3);
   cursor: pointer;
   transition: all var(--app-transition-fast);
+}
+.cal__cell.is-today {
+  border-color: var(--app-brand-400);
+  background: var(--app-brand-50);
 }
 .cal__cell:hover:not(.is-empty) {
   border-color: var(--app-brand-400);

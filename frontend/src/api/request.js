@@ -29,8 +29,9 @@ service.interceptors.response.use(
     ElMessage.error(msg)
 
     if (res.code === BIZ_CODE.UNAUTHORIZED) {
+      // dev-mock token 不会被后端认可，不要清登录态
+      if (getToken() === 'dev-mock') return Promise.reject(new Error(msg))
       clearAuth()
-      // 延迟跳转，避免在 router 实例尚未注入时调用
       setTimeout(() => {
         if (location.hash !== '#/login' && location.pathname !== '/login') {
           location.href = '/login'
@@ -45,7 +46,7 @@ service.interceptors.response.use(
     const data = error.response?.data
     const msg = data?.message || error.message || '网络异常，请稍后重试'
     ElMessage.error(msg)
-    if (status === 401) {
+    if (status === 401 && getToken() !== 'dev-mock') {
       clearAuth()
       setTimeout(() => { location.href = '/login' }, 300)
     }

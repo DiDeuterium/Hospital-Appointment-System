@@ -34,8 +34,13 @@ async function doBook() {
   if (!schedule.value) return
   loading.value = true
   try {
+    const pid = user.profile?.patientId
+    if (!pid) {
+      ElMessage.warning('无法获取就诊人信息，请重新登录')
+      return
+    }
     const res = await createAppointment({
-      patientId: user.profile?.patientId,
+      patientId: pid,
       scheduleId: schedule.value.scheduleId
     })
     stashResult(res)

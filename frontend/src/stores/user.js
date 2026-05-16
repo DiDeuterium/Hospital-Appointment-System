@@ -17,8 +17,8 @@ export const useUserStore = defineStore('user', () => {
 
   const isLoggedIn = computed(() => !!token.value && !!role.value)
   const displayName = computed(() => {
-    if (!profile.value) return ''
-    return profile.value.realName || profile.value.docName || profile.value.username || ''
+    if (!profile.value || !role.value) return ''
+    return profile.value.realName || profile.value.docName || profile.value.username || role.value
   })
 
   function login({ role: r, token: t, profile: p }) {

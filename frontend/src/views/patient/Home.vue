@@ -37,7 +37,7 @@ onMounted(async () => {
     const pid = user.profile?.patientId
     const [depts, appts] = await Promise.all([
       listDepartments(),
-      pid ? listMyAppointments(pid, { status: APPT_STATUS.BOOKED }) : Promise.resolve([])
+      pid ? listMyAppointments(pid, { status: APPT_STATUS.BOOKED }).catch(() => []) : []
     ])
     hotDepts.value = depts.slice(0, 4)
     recentAppt.value = Array.isArray(appts) && appts.length ? appts[0] : null

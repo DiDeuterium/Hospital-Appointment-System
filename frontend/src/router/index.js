@@ -67,8 +67,8 @@ const router = createRouter({
 // ⚠ 上线/联调前必须改回 false 并删除 mock 注入逻辑。
 const BYPASS_AUTH = true
 const MOCK_PROFILES = {
-  patient: { patientId: 0, realName: '开发用户' },
-  doctor: { docId: 'DEV001', docName: '开发医生' },
+  patient: { patientId: 1, realName: '测试患者' },
+  doctor: { docId: 'DOC001', docName: '测试医生' },
   admin: { username: 'dev-admin' }
 }
 // ======================================
@@ -80,11 +80,13 @@ router.beforeEach((to) => {
   }
 
   if (BYPASS_AUTH) {
+    // 按路由前缀推断角色；若已登录真实账号则不覆盖
     const targetRole =
       to.path.startsWith('/patient') ? 'patient' :
       to.path.startsWith('/doctor') ? 'doctor' :
       to.path.startsWith('/admin') ? 'admin' : null
-    if (targetRole && (!user.isLoggedIn || (user.token === 'dev-mock' && user.role !== targetRole))) {
+    const isMock = user.token === 'dev-mock' || !user.token
+    if (targetRole && isMock) {
       user.login({ role: targetRole, token: 'dev-mock', profile: MOCK_PROFILES[targetRole] })
     }
     return true
