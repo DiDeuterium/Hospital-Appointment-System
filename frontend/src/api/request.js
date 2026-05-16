@@ -3,6 +3,10 @@ import { ElMessage } from 'element-plus'
 import { getToken, clearAuth } from '@/utils/storage'
 import { BIZ_CODE } from '@/utils/constants'
 
+// 开发期保护：在本地环境，任何 401 都不触发强制登出
+const isLocalDev = typeof location !== 'undefined'
+  && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 15000
@@ -26,11 +30,16 @@ service.interceptors.response.use(
     if (res.code === BIZ_CODE.OK) return res.data
 
     const msg = res.message || '请求失败'
+
+    // 401 在本地开发 / mock token 时：不弹错误，不登出，静默失败
+    if (res.code === BIZ_CODE.UNAUTHORIZED && (getToken() === 'dev-mock' || isLocalDev)) {
+      console.warn('[DEV] API 返回 401，已跳过登出:', msg)
+      return Promise.reject(new Error(msg))
+    }
+
     ElMessage.error(msg)
 
     if (res.code === BIZ_CODE.UNAUTHORIZED) {
-      // dev-mock token 不会被后端认可，不要清登录态
-      if (getToken() === 'dev-mock') return Promise.reject(new Error(msg))
       clearAuth()
       setTimeout(() => {
         if (location.hash !== '#/login' && location.pathname !== '/login') {
@@ -45,8 +54,15 @@ service.interceptors.response.use(
     const status = error.response?.status
     const data = error.response?.data
     const msg = data?.message || error.message || '网络异常，请稍后重试'
+
+    // 401 在本地开发 / mock token 时：不弹错误，不登出
+    if (status === 401 && (getToken() === 'dev-mock' || isLocalDev)) {
+      console.warn('[DEV] HTTP 401，已跳过登出:', msg)
+      return Promise.reject(new Error(msg))
+    }
+
     ElMessage.error(msg)
-    if (status === 401 && getToken() !== 'dev-mock') {
+    if (status === 401) {
       clearAuth()
       setTimeout(() => { location.href = '/login' }, 300)
     }

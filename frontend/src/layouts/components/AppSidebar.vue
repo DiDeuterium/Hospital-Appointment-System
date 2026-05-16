@@ -26,6 +26,8 @@ const ICON_ALIAS = {
 }
 
 const menus = computed(() => {
+  // 若 role 为空（未注入也未登录），返空让模板显示空状态提示
+  if (!user.role) return []
   const all = router.getRoutes()
   const parents = all.filter(r =>
     Array.isArray(r.meta?.roles) &&
@@ -70,6 +72,9 @@ function isActive(path) {
         <AppIcon v-if="m.icon" :name="m.icon" :size="18" class="app-sidebar__icon" />
         <span class="app-sidebar__label">{{ m.title }}</span>
       </router-link>
+      <div v-if="!menus.length && user.role" class="app-sidebar__empty">
+        暂无菜单（角色：{{ user.role }}）
+      </div>
     </nav>
   </aside>
 </template>
@@ -139,4 +144,10 @@ function isActive(path) {
 }
 .app-sidebar__icon { flex-shrink: 0; color: inherit; }
 .app-sidebar__label { flex: 1; min-width: 0; }
+.app-sidebar__empty {
+  padding: var(--app-sp-6) var(--app-sp-3);
+  text-align: center;
+  color: var(--app-text-4);
+  font-size: var(--app-fs-caption);
+}
 </style>

@@ -11,10 +11,15 @@ const list = ref([])
 const loading = ref(false)
 
 async function load() {
+  const docId = user.profile?.docId
+  if (!docId) {
+    list.value = []
+    return
+  }
   loading.value = true
   try {
     const params = workDate.value ? { workDate: workDate.value } : {}
-    list.value = await myDoctorSchedules(user.profile?.docId, params)
+    list.value = await myDoctorSchedules(docId, params)
   } catch (e) {} finally {
     loading.value = false
   }
