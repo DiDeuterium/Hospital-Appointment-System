@@ -18,33 +18,33 @@ INSERT INTO department (dept_name, location, description) VALUES
 
 -- 医生 (12 条, 密码均为 123456 的 BCrypt 哈希)
 INSERT INTO doctor (doc_name, gender, title, dept_id, password) VALUES
-('张伟',   'M', '主任医师',   1, '$2b$12$e3hCt3nf0JgwOeo1.jSHK.yvqp97DUzHI9U34rYoZGEnnSwgMw8lG'),
-('李娜',   'F', '副主任医师', 1, '$2b$12$vdg1PZ04yLJ0NRWcyCM7fOdt3aSXnI/cyc.ayNthr7QOAzUmaXw5u'),
-('王强',   'M', '主任医师',   2, '$2b$12$yqjZVYC9DvRRkf9F21qNvOCW0R0ls.cfwsrHW0M.jL3K4kvrRFOhC'),
-('刘芳',   'F', '主治医师',   2, '$2b$12$MwB8F3JbB3wGwDJnSmirAuN71RikJNIus4yDv94AtQiXCiloMvlV.'),
-('陈刚',   'M', '主任医师',   3, '$2b$12$dM0jYsI5ei4xjjuk/aezTulel3bAzTSY4BkgrAH.SaB5AQjarE.HG'),
-('杨丽',   'F', '副主任医师', 3, '$2b$12$W5VFaDrDC/XIMZk5VdpxAezhpEPHeKO.El3GOtBuqBMf4Fj08vIZm'),
-('赵敏',   'F', '主任医师',   4, '$2b$12$sbxs21ZagSbK746TSWI8hOzxQxegFJgBzPrt/vRHSnxAwydFHjRd.'),
-('孙磊',   'M', '主治医师',   5, '$2b$12$V76JLAoANt7olI2OWLYw3uGiAS3Gy3hE91jC9So9U0dMFSsvFyjLK'),
-('周杰',   'M', '主任医师',   6, '$2b$12$IIUBQ9S8Xrk06z5qgBdqEO.2WCW0awQooKLobaS7K1HhxOWh.fJXK'),
-('吴秀英', 'F', '副主任医师', 7, '$2b$12$LagKSFW58AmkDsrigA7FO.K9MCtM4NxrBDBCstu6G3V.EFT7RPIDe'),
-('郑涛',   'M', '主治医师',   8, '$2b$12$oiVk8rjLeA256wWVic4FiuTRAvwPj2vjtpWTUC7XkmtMzis/mwVoK'),
-('钱红',   'F', '主任医师',   9, '$2b$12$2Ho86iz.D0xVsZf5ug.R4eP5J5/Q.D9o9Pabm5O6bXlvewyOqNGhi');
+('张伟',   'M', '主任医师',   1, '$2b$10$OxDoBhKyhGJ/sPWLBK3QOuVg1g0Cm7UIYPAG0LlsN5BAFgqEZdhOi'),
+('李娜',   'F', '副主任医师', 1, '$2b$10$Y6eNyHtHCKy0stV..jLr9.Eq4C9mZsvLnEMu29WBPNCuOubYx4l9O'),
+('王强',   'M', '主任医师',   2, '$2b$10$YKBK.65uhGul38tG5RLU/u61nSO9PjmBcc1m12Tfe5bxkBPOt4Du6'),
+('刘芳',   'F', '主治医师',   2, '$2b$10$.Hoon5Ehe4uAPZlDqMp.AuZ7DZQi4KzGkuL0E0ps1T4Y.z0ohkNzm'),
+('陈刚',   'M', '主任医师',   3, '$2b$10$PFMDur4veCaeqMm6L9GWbe/7e54cuJO8p55bJGnFd3VWFLsc0vOpS'),
+('杨丽',   'F', '副主任医师', 3, '$2b$10$veDC4Kie5RrwMv8MrHcZTugQkU37/KvAX/1.QbAHVUHY1ex4L.YJC'),
+('赵敏',   'F', '主任医师',   4, '$2b$10$lsoP1laicZoNRdlvy6YZgulUXTbQAfFtaxXKNRXGFBM.Zvd9Qn6nm'),
+('孙磊',   'M', '主治医师',   5, '$2b$10$QZugyY6te.J8pVf0/e7Rz.5PA1rV2qgQIhQ3savvEPtt9volQlw26'),
+('周杰',   'M', '主任医师',   6, '$2b$10$Z0.XBRZYz2qSfmu.Tc/BJeVEJOcs.TJA7Tm/j.WkYPa7huYEjMJ/q'),
+('吴秀英', 'F', '副主任医师', 7, '$2b$10$4OWUyDWQR3JA1KK6jFGoXuIX9SWZnzywF3RBUI6h.cTYF9F80CP.G'),
+('郑涛',   'M', '主治医师',   8, '$2b$10$G41IP6nA2NS8OG0MMzbpa.7ncsnaZn/9bjuL5Y8phBgBf8Oc23SL6'),
+('钱红',   'F', '主任医师',   9, '$2b$10$OGCCox9Izs6eSqTBjq64N.xd07w7HFn8io4yp6z.K5zhuF9Hc/jV6');
 
 -- 患者 (12 条, 密码均为 123456 的 BCrypt 哈希)
 INSERT INTO patient (id_card, real_name, gender, phone, password) VALUES
-('110101199001011234', '赵小明', 'M', '13800001111', '$2b$12$c3H9qliZ80KkuevWvfliS.HNvIePFjkJc3/keZFXk8zhMh4hmABsC'),
-('110101199205202345', '钱小红', 'F', '13800002222', '$2b$12$68SJ.nD/kul/WOHWbsTBYu.abpywXR05bPBy2K8KZKjCGTFVFz4Qi'),
-('310102198803153456', '孙大伟', 'M', '13900003333', '$2b$12$c3lGJp.zFcm713/jvd0.A.4HGydX.iAffVf4aNOpljDODODJvuAR2'),
-('310102199511204567', '李美玲', 'F', '13900004444', '$2b$12$fkFex9GaT0AODKBWFwKEeeOtdGQyn9527ZbIS1YB2hlNDHjOk2NrK'),
-('440103197807256789', '周文博', 'M', '13600005555', '$2b$12$O6wk2eIzv2DgWWw7sa3RxOsx5BF4wBTvKbuChJzR5HT6UpRRz8UmW'),
-('440103199209108901', '吴丽华', 'F', '13600006666', '$2b$12$WGMCeaLSyfkcS9Wex059.O1YsiG7oZ4F5/m8OHByOPWJ0JgZdcb2O'),
-('330106198512251112', '郑国强', 'M', '13700007777', '$2b$12$nH6D01tCFApBeUbtuwmymeQd5PGurR4GQmChJgTwJswVqvQ943hVS'),
-('330106199608062223', '王秀兰', 'F', '13700008888', '$2b$12$XUf0hqmueZJ6vhkpGcVFQeR1YCpratr5RMifSP2Vzoc3sYHbHF6kO'),
-('510104199103173334', '冯建军', 'M', '13500009999', '$2b$12$NbI6zelOVY9RmxULZrDlOOp/sR8qIgWIPb2jpjBAJP52czy25R9BS'),
-('510104199812084445', '陈玉芬', 'F', '13500001110', '$2b$12$493iGnB/Fa2VvM3BU31UoekbUtsge3TfB7AqeHiu2bmmxcQ4cSvsa'),
-('320105198706185556', '蒋明辉', 'M', '13300001111', '$2b$12$gv187YZz1TEGnLUcAa9/tO.n7ql8hUNwTY7hai3xynTeRrPqgBQl2'),
-('320105199404096667', '沈秀英', 'F', '13300002222', '$2b$12$FGpK3CRSE/FFCAGFQlm11u33P64ZGwN4lkw2WGFCE47ohBKQ/Nd.O');
+('110101199001011234', '赵小明', 'M', '13800001111', '$2b$10$/alhAc1F2S6TE.yPV3Y37.qcaUwhcLP5CVwF./spiiChb0dB7KdeS'),
+('110101199205202345', '钱小红', 'F', '13800002222', '$2b$10$0Eiyfl3YSmncbHSmLgXZtuEJrLbX6k16Rb3JVHCEmoNd5lQy5pJ5O'),
+('310102198803153456', '孙大伟', 'M', '13900003333', '$2b$10$90y2eCkSK9uHw4XRcsJ0..ZVivw4rwsbadD3NOPysdSvaeT2BpXye'),
+('310102199511204567', '李美玲', 'F', '13900004444', '$2b$10$1hg5.LJZ.vlC/0Dc0QiX5uFZi9o5w7fxphY2Htid4kv09xNgJfLma'),
+('440103197807256789', '周文博', 'M', '13600005555', '$2b$10$mZ06NZiZ3A.vrG5rKF/g3uVaiuMl/ohqSC.X7XAmFKx2tjjIZNmbS'),
+('440103199209108901', '吴丽华', 'F', '13600006666', '$2b$10$m7KUajd4.WF.JWvDAvAs0uRz1S0liB6WKx.ZNUOX94kKIYncBaQ46'),
+('330106198512251112', '郑国强', 'M', '13700007777', '$2b$10$ZHVCj1SLin3Rt6/LWzouc.QZDCTaS.NmRmZJCq5ckZDS9B1ip3kMu'),
+('330106199608062223', '王秀兰', 'F', '13700008888', '$2b$10$jLaaoN41LzNeOT5DVTmZ2OJRoJf/GoArIzrFBuDZubGR0vupwFqdm'),
+('510104199103173334', '冯建军', 'M', '13500009999', '$2b$10$TB97rGxCpggj.6yRKmdol.pjdfaHhjP8xSM7Hgz/hDSaVatjNgWdy'),
+('510104199812084445', '陈玉芬', 'F', '13500001110', '$2b$10$MjvA7KmskWzh9c/QzLnJ6u1cLKOY3tm/Pz6KiL2EZgq1qz4evQG/6'),
+('320105198706185556', '蒋明辉', 'M', '13300001111', '$2b$10$.Xs3E.jI7jTD4yQtJxXsJeUe28xKx/sdZLCuDopfhyUbfZhHs2KE6'),
+('320105199404096667', '沈秀英', 'F', '13300002222', '$2b$10$h2AC4.HsLyWKEKFR5rWTTOU.vxa8LdioeWwVPFk0iukZwYVkSYS3i');
 
 -- 排班 (16 条, 包含过去/今天/未来日期)
 INSERT INTO schedule (doc_id, work_date, shift, total_quota, rest_quota) VALUES
