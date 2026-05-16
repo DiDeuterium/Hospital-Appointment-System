@@ -58,7 +58,9 @@ async function cancel(row) {
     await cancelAppointment(row.apptId)
     ElMessage.success('已取消')
     load()
-  } catch { /* 用户取消或请求失败 */ }
+  } catch (e) {
+    if (e !== 'cancel' && e?.message) ElMessage.error(e.message)
+  }
 }
 
 function viewDetail(row) {
