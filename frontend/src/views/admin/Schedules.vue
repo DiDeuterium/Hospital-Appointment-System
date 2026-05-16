@@ -32,7 +32,8 @@ const rules = {
 async function load() {
   loading.value = true
   try {
-    const params = {}
+    // deptId 必须传（后端 @RequestParam required=true），admin 查全院时传空字符串
+    const params = { deptId: '' }
     if (filters.docId) params.docId = filters.docId
     if (filters.workDate) params.workDate = filters.workDate
     list.value = await listSchedules(params)

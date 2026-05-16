@@ -46,19 +46,23 @@ async function handleSubmit() {
     let data, profile
     if (role.value === ROLE.PATIENT) {
       data = await patientLogin({ idCard: form.idCard, password: form.password })
-      profile = { patientId: data.patientId, realName: data.realName }
+      profile = { patientId: data.patientId || data.userId, realName: data.realName || data.name }
     } else if (role.value === ROLE.DOCTOR) {
       data = await doctorLogin({ docId: form.docId, password: form.password })
-      profile = { docId: data.docId, docName: data.docName }
+      profile = { docId: data.docId || data.userId, docName: data.docName || data.name }
     } else {
       data = await adminLogin({ username: form.username, password: form.password })
-      profile = { username: form.username }
+      profile = { username: data.username || data.userId || form.username, realName: data.realName || data.name }
     }
+    if (!data?.token) throw new Error('登录响应缺少 token')
     user.login({ role: role.value, token: data.token, profile })
     ElMessage.success('登录成功')
     const redirect = route.query.redirect
     router.replace(redirect || (role.value === ROLE.PATIENT ? '/patient' : '/' + role.value))
-  } catch { /* 拦截器已弹错误 */ } finally {
+  } catch (e) {
+    // 业务错误（非 HTTP 错误，如 token 缺失）这里处理；HTTP 错误已由 request.js 拦截器弹
+    if (!e.response && e.message) ElMessage.error(e.message)
+  } finally {
     loading.value = false
   }
 }
