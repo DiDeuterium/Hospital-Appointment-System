@@ -46,18 +46,19 @@ INSERT INTO department (dept_name, location, description) VALUES
 --   dept_id: 1=心内科 2=神经内科 3=骨科 4=儿科 5=皮肤科 6=眼科 7=耳鼻喉科 8=消化内科 9=呼吸内科 10=妇科
 -- ============================================
 INSERT INTO doctor (doc_name, gender, title, dept_id, password) VALUES
-('张伟',   'M', '主任医师',   1, '$2b$12$e3hCt3nf0JgwOeo1.jSHK.yvqp97DUzHI9U34rYoZGEnnSwgMw8lG'),
-('李娜',   'F', '副主任医师', 1, '$2b$12$vdg1PZ04yLJ0NRWcyCM7fOdt3aSXnI/cyc.ayNthr7QOAzUmaXw5u'),
-('王强',   'M', '主任医师',   2, '$2b$12$yqjZVYC9DvRRkf9F21qNvOCW0R0ls.cfwsrHW0M.jL3K4kvrRFOhC'),
-('刘芳',   'F', '主治医师',   2, '$2b$12$MwB8F3JbB3wGwDJnSmirAuN71RikJNIus4yDv94AtQiXCiloMvlV.'),
-('陈刚',   'M', '主任医师',   3, '$2b$12$dM0jYsI5ei4xjjuk/aezTulel3bAzTSY4BkgrAH.SaB5AQjarE.HG'),
-('杨丽',   'F', '副主任医师', 3, '$2b$12$W5VFaDrDC/XIMZk5VdpxAezhpEPHeKO.El3GOtBuqBMf4Fj08vIZm'),
-('赵敏',   'F', '主任医师',   4, '$2b$12$sbxs21ZagSbK746TSWI8hOzxQxegFJgBzPrt/vRHSnxAwydFHjRd.'),
-('孙磊',   'M', '主治医师',   5, '$2b$12$V76JLAoANt7olI2OWLYw3uGiAS3Gy3hE91jC9So9U0dMFSsvFyjLK'),
-('周杰',   'M', '主任医师',   6, '$2b$12$IIUBQ9S8Xrk06z5qgBdqEO.2WCW0awQooKLobaS7K1HhxOWh.fJXK'),
-('吴秀英', 'F', '副主任医师', 7, '$2b$12$LagKSFW58AmkDsrigA7FO.K9MCtM4NxrBDBCstu6G3V.EFT7RPIDe'),
-('郑涛',   'M', '主治医师',   8, '$2b$12$oiVk8rjLeA256wWVic4FiuTRAvwPj2vjtpWTUC7XkmtMzis/mwVoK'),
-('钱红',   'F', '主任医师',   9, '$2b$12$2Ho86iz.D0xVsZf5ug.R4eP5J5/Q.D9o9Pabm5O6bXlvewyOqNGhi');
+INSERT INTO doctor (doc_name, gender, title, dept_id, password) VALUES
+('张伟',   'M', '主任医师',   1, '$2b$10$OxDoBhKyhGJ/sPWLBK3QOuVg1g0Cm7UIYPAG0LlsN5BAFgqEZdhOi'),
+('李娜',   'F', '副主任医师', 1, '$2b$10$Y6eNyHtHCKy0stV..jLr9.Eq4C9mZsvLnEMu29WBPNCuOubYx4l9O'),
+('王强',   'M', '主任医师',   2, '$2b$10$YKBK.65uhGul38tG5RLU/u61nSO9PjmBcc1m12Tfe5bxkBPOt4Du6'),
+('刘芳',   'F', '主治医师',   2, '$2b$10$.Hoon5Ehe4uAPZlDqMp.AuZ7DZQi4KzGkuL0E0ps1T4Y.z0ohkNzm'),
+('陈刚',   'M', '主任医师',   3, '$2b$10$PFMDur4veCaeqMm6L9GWbe/7e54cuJO8p55bJGnFd3VWFLsc0vOpS'),
+('杨丽',   'F', '副主任医师', 3, '$2b$10$veDC4Kie5RrwMv8MrHcZTugQkU37/KvAX/1.QbAHVUHY1ex4L.YJC'),
+('赵敏',   'F', '主任医师',   4, '$2b$10$lsoP1laicZoNRdlvy6YZgulUXTbQAfFtaxXKNRXGFBM.Zvd9Qn6nm'),
+('孙磊',   'M', '主治医师',   5, '$2b$10$QZugyY6te.J8pVf0/e7Rz.5PA1rV2qgQIhQ3savvEPtt9volQlw26'),
+('周杰',   'M', '主任医师',   6, '$2b$10$Z0.XBRZYz2qSfmu.Tc/BJeVEJOcs.TJA7Tm/j.WkYPa7huYEjMJ/q'),
+('吴秀英', 'F', '副主任医师', 7, '$2b$10$4OWUyDWQR3JA1KK6jFGoXuIX9SWZnzywF3RBUI6h.cTYF9F80CP.G'),
+('郑涛',   'M', '主治医师',   8, '$2b$10$G41IP6nA2NS8OG0MMzbpa.7ncsnaZn/9bjuL5Y8phBgBf8Oc23SL6'),
+('钱红',   'F', '主任医师',   9, '$2b$10$OGCCox9Izs6eSqTBjq64N.xd07w7HFn8io4yp6z.K5zhuF9Hc/jV6');
 
 -- ============================================
 -- 3. 患者表 (12 条, ID 1-12)
