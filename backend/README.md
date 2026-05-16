@@ -48,7 +48,7 @@ backend/
         └── application.yml          # 应用配置
 ```
 
-对应的 SQL 脚本位于项目根目录下的 `sql/` 目录。
+应用启动时自动执行 `src/main/resources/` 下的 `schema.sql` 和 `data.sql`，无需手动建库。原始 SQL 脚本位于项目根目录下的 `sql/` 目录。
 
 ## 快速启动
 
@@ -56,26 +56,16 @@ backend/
 
 - **JDK 17** 或更高
 - **Maven 3.8**+
-- **MySQL 8.0**+（需创建数据库并导入表结构）
+- **MySQL 8.0**+（确保服务正在运行即可，数据库和表由应用自动创建）
 
-### 2. 数据库初始化
-
-```bash
-# 在 MySQL 中执行建表脚本
-mysql -u root -p < ../sql/schema.sql
-
-# （可选）导入测试数据
-mysql -u root -p < ../sql/data.sql
-```
-
-### 3. 修改配置
+### 2. 修改配置
 
 编辑 `src/main/resources/application.yml`，根据本地环境修改数据库连接信息：
 
 ```yaml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/hospital_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/hospital_db?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root        # 改为你的 MySQL 用户名
     password: root        # 改为你的 MySQL 密码
 ```
@@ -88,7 +78,7 @@ admin:
   password: admin123
 ```
 
-### 4. 启动项目
+### 3. 启动项目
 
 ```bash
 cd backend
@@ -176,13 +166,16 @@ MyBatis-Plus 已配置 `StdOutImpl` 日志实现，所有 SQL 会输出到控制
 
 确认 SpringDoc 依赖已正确引入（`springdoc-openapi-starter-webmvc-ui`），启动后访问 `/swagger-ui.html`。如果被拦截器拦截，检查 `WebMvcConfig` 中 Swagger 相关路径是否在排除列表中。
 
+### Q: 每次启动都会重置数据库吗？
+
+是的。`spring.sql.init.mode: always` 会在每次启动时执行 `schema.sql`（删表重建）和 `data.sql`（插入测试数据），所以重启后所有数据会恢复到初始状态。如需保留数据，将 `application.yml` 中的 `spring.sql.init.mode` 改为 `never`，并手动执行 `sql/` 目录下的脚本。
+
 ### Q: 启动时提示数据库连接失败？
 
 检查以下项目：
 1. MySQL 服务是否运行
 2. `application.yml` 中的数据库 URL、用户名、密码是否正确
-3. 数据库 `hospital_db` 是否已创建（执行 `schema.sql` 会自动创建）
-4. MySQL 驱动是否与数据库版本兼容（MySQL 8.0+ 使用 `mysql-connector-j`）
+3. MySQL 驱动是否与数据库版本兼容（MySQL 8.0+ 使用 `mysql-connector-j`）
 
 ### Q: IDEA 中 Lombok 报错？
 
