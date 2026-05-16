@@ -15,12 +15,16 @@ const status = ref('')
 const loading = ref(false)
 
 async function load() {
+  const pid = user.profile?.patientId
+  if (!pid) {
+    list.value = []
+    return
+  }
   loading.value = true
   try {
-    const pid = user.profile?.patientId
     const params = status.value ? { status: status.value } : {}
     list.value = await listMyAppointments(pid, params)
-  } catch (e) {} finally {
+  } catch { /* 拦截器已弹错误 */ } finally {
     loading.value = false
   }
 }

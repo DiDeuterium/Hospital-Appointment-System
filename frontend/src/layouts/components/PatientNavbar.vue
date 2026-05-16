@@ -55,7 +55,7 @@ function isActive(to) {
         <el-dropdown trigger="click">
           <div class="navbar__user">
             <span class="navbar__avatar">{{ (user.displayName || '?').slice(0, 1) }}</span>
-            <span class="navbar__name">{{ user.displayName || '未登录' }}</span>
+            <span class="navbar__name">{{ user.displayName || user.role || '未登录' }}</span>
             <AppIcon name="chevron-down" :size="14" />
           </div>
           <template #dropdown>

@@ -37,7 +37,7 @@ async function load() {
       listDepartments()
     ])
     list.value = schedules
-    const found = depts.find(d => d.deptId == deptId)
+    const found = depts.find(d => String(d.deptId) === String(deptId))
     if (found) {
       deptName.value = found.deptName
       // 给每条排班挂上 deptName

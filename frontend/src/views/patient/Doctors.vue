@@ -21,7 +21,7 @@ async function load() {
       listDepartments()
     ])
     list.value = doctors
-    const found = depts.find(d => d.deptId == deptId)
+    const found = depts.find(d => String(d.deptId) === String(deptId))
     deptName.value = found?.deptName || `科室 ${deptId}`
   } catch { /* 静默 */ } finally {
     loading.value = false

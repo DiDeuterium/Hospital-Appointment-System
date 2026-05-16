@@ -27,7 +27,7 @@ async function handleLogout() {
         <div class="app-header__user">
           <span class="app-header__avatar">{{ (user.displayName || '?').slice(0, 1) }}</span>
           <div class="app-header__user-meta">
-            <div class="app-header__name">{{ user.displayName || '未登录' }}</div>
+            <div class="app-header__name">{{ user.displayName || user.role || '未登录' }}</div>
             <div class="app-header__role">{{ ROLE_LABEL[user.role] || '' }}</div>
           </div>
           <AppIcon name="chevron-down" :size="14" />
