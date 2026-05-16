@@ -5,6 +5,7 @@ import doctorRoutes from './routes/doctor'
 import adminRoutes from './routes/admin'
 import { useUserStore } from '@/stores/user'
 import { ROLE } from '@/utils/constants'
+import { patientLogin, doctorLogin, adminLogin } from '@/api/auth'
 
 const HOME_BY_ROLE = {
   [ROLE.PATIENT]: '/patient/home',
@@ -62,32 +63,87 @@ const router = createRouter({
 })
 
 // ============ 临时开发开关 ============
-// BYPASS_AUTH = true：跳过登录/权限校验，按访问路径自动注入对应角色的 mock 登录态，
-//                     便于 UI 设计阶段直接访问任意页面查看效果。
-// ⚠ 上线/联调前必须改回 false 并删除 mock 注入逻辑。
+// BYPASS_AUTH = true：跳过登录/权限校验，自动用测试账号向真实后端登录拿到 token。
+//   - 患者 → 用 data.sql 第一条患者 (赵小明 110101199001011234 / 123456) 登录
+//   - 医生 → 用 data.sql 第一条医生 (张伟 DOC001 / 123456) 登录
+//   - 管理员 → 用 admin / admin123 登录
+//   - 登录成功后 token 缓存到 sessionStorage，同标签页内不复登
+//   - 登录失败则回退到 mock 假 token（只可读，不可写）
+// ⚠ 上线/联调前必须改回 false 并删除本节全部逻辑。
 const BYPASS_AUTH = true
+const DEMO_CREDENTIALS = {
+  patient: { login: patientLogin, payload: { idCard: '110101199001011234', password: '123456' } },
+  doctor:  { login: doctorLogin,  payload: { docId: 'DOC001', password: '123456' } },
+  admin:   { login: adminLogin,   payload: { username: 'admin', password: 'admin123' } }
+}
 const MOCK_PROFILES = {
   patient: { patientId: 1, realName: '测试患者' },
-  doctor: { docId: 'DOC001', docName: '测试医生' },
-  admin: { username: 'dev-admin' }
+  doctor:  { docId: 'DOC001', docName: '测试医生' },
+  admin:   { username: 'dev-admin' }
+}
+
+const DEMO_TOKEN_KEY = 'hospital:demoToken'
+
+function getCachedDemoAuth(role) {
+  try {
+    const obj = JSON.parse(sessionStorage.getItem(DEMO_TOKEN_KEY) || '{}')
+    // 缓存存的是 { token, raw } 完整对象
+    if (obj.role === role && obj.token) return obj
+  } catch { /* ignore */ }
+  return null
+}
+
+async function tryDemoLogin(role) {
+  const cached = getCachedDemoAuth(role)
+  if (cached) return { token: cached.token, raw: cached.raw }
+
+  const cred = DEMO_CREDENTIALS[role]
+  if (!cred) return null
+
+  try {
+    const data = await cred.login(cred.payload)
+    if (data?.token) {
+      // 缓存完整认证信息
+      sessionStorage.setItem(DEMO_TOKEN_KEY, JSON.stringify({ role, token: data.token, raw: data }))
+      return { token: data.token, raw: data }
+    }
+  } catch { /* 后端未启动或密码不对 → 回退 mock */ }
+  return null
+}
+
+function buildProfile(role, data) {
+  if (!data) return MOCK_PROFILES[role]
+  if (role === 'patient') return { patientId: data.patientId || data.userId, realName: data.realName || data.name }
+  if (role === 'doctor')  return { docId: data.docId || data.userId, docName: data.docName || data.name }
+  return { username: data.username || data.userId || 'admin', realName: data.realName || data.name }
 }
 // ======================================
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const user = useUserStore()
   if (to.meta.title) {
     document.title = `${to.meta.title} - ${import.meta.env.VITE_APP_TITLE || '医院预约挂号系统'}`
   }
 
   if (BYPASS_AUTH) {
-    // 按路由前缀推断角色；若已登录真实账号则不覆盖
     const targetRole =
       to.path.startsWith('/patient') ? 'patient' :
       to.path.startsWith('/doctor') ? 'doctor' :
       to.path.startsWith('/admin') ? 'admin' : null
     const isMock = user.token === 'dev-mock' || !user.token
+
     if (targetRole && isMock) {
-      user.login({ role: targetRole, token: 'dev-mock', profile: MOCK_PROFILES[targetRole] })
+      // 尝试用测试账号真实登录
+      const real = await tryDemoLogin(targetRole)
+      if (real) {
+        user.login({
+          role: targetRole,
+          token: real.token,
+          profile: buildProfile(targetRole, real.raw)
+        })
+      } else {
+        user.login({ role: targetRole, token: 'dev-mock', profile: MOCK_PROFILES[targetRole] })
+      }
     }
     return true
   }

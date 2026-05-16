@@ -7,13 +7,19 @@ export default [
     path: '/doctor',
     component: () => import('@/layouts/DefaultLayout.vue'),
     meta,
-    redirect: '/doctor/schedules',
+    redirect: '/doctor/workbench',
     children: [
+      {
+        path: 'workbench',
+        name: 'DoctorWorkbench',
+        component: () => import('@/views/doctor/Workbench.vue'),
+        meta: { ...meta, title: '工作台', icon: 'dashboard' }
+      },
       {
         path: 'schedules',
         name: 'DoctorSchedules',
         component: () => import('@/views/doctor/Schedules.vue'),
-        meta: { ...meta, title: '我的排班', icon: 'Calendar' }
+        meta: { ...meta, title: '我的排班', icon: 'calendar' }
       },
       {
         path: 'schedules/:scheduleId/patients',

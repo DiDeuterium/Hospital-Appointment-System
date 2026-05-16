@@ -14,8 +14,13 @@ const service = axios.create({
 
 service.interceptors.request.use(
   config => {
-    const token = getToken()
-    if (token) config.headers.token = token
+    // 登录/注册是公开端点，不应带 token，避免后端全局拦截器误判
+    const url = config.url || ''
+    const isPublic = url.includes('/login') || url.includes('/register')
+    if (!isPublic) {
+      const token = getToken()
+      if (token) config.headers.token = token
+    }
     return config
   },
   error => Promise.reject(error)
@@ -33,8 +38,9 @@ service.interceptors.response.use(
 
     // 401 在本地开发 / mock token 时：不弹错误，不登出，静默失败
     if (res.code === BIZ_CODE.UNAUTHORIZED && (getToken() === 'dev-mock' || isLocalDev)) {
+      // 开发模式下保留错误消息让调用方自行决定是否弹窗（挂号等写操作需要提示用户）
       console.warn('[DEV] API 返回 401，已跳过登出:', msg)
-      return Promise.reject(new Error(msg))
+      return Promise.reject(new Error('[开发模式] ' + (msg || '请使用真实账号登录后重试')))
     }
 
     ElMessage.error(msg)
@@ -55,10 +61,9 @@ service.interceptors.response.use(
     const data = error.response?.data
     const msg = data?.message || error.message || '网络异常，请稍后重试'
 
-    // 401 在本地开发 / mock token 时：不弹错误，不登出
     if (status === 401 && (getToken() === 'dev-mock' || isLocalDev)) {
       console.warn('[DEV] HTTP 401，已跳过登出:', msg)
-      return Promise.reject(new Error(msg))
+      return Promise.reject(new Error('[开发模式] ' + (msg || '请使用真实账号登录后重试')))
     }
 
     ElMessage.error(msg)
