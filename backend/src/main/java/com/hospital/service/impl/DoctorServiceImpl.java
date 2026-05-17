@@ -59,6 +59,9 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public void add(DoctorRequest request) {
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new BusinessException(400, "密码不能为空");
+        }
         Doctor exist = doctorMapper.selectById(request.getDocId());
         if (exist != null) {
             throw new BusinessException(409, "医生工号已存在");
