@@ -1,2 +1,5 @@
-"backend/target/" 
-"*.class" 
+backend/target/
+*.class
+.idea
+backend/src/main/resources/application.yml
+frontend/package-lock.json
