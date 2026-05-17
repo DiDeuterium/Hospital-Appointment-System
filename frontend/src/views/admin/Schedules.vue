@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { listSchedules, createSchedule, updateSchedule, deleteSchedule } from '@/api/schedule'
+import { listAdminSchedules, createSchedule, updateSchedule, deleteSchedule } from '@/api/schedule'
 import { listDoctors } from '@/api/doctor'
 import { SHIFT_OPTIONS } from '@/utils/constants'
 import PageHeader from '@/components/PageHeader.vue'
@@ -28,10 +28,10 @@ const rules = {
 async function load() {
   loading.value = true
   try {
-    const params = { deptId: '' }
+    const params = {}
     if (filters.docId) params.docId = filters.docId
     if (filters.workDate) params.workDate = filters.workDate
-    list.value = await listSchedules(params)
+    list.value = await listAdminSchedules(params)
   } catch {} finally { loading.value = false }
 }
 async function loadDoctors() { doctors.value = await listDoctors({ deptId: '' }) }

@@ -39,8 +39,7 @@ async function submit() {
   await formRef.value.validate()
   try {
     if (dialog.isEdit) {
-      const { deptId, ...rest } = dialog.form
-      await updateDepartment(deptId, rest)
+      await updateDepartment(dialog.form.deptId, dialog.form)
       ElMessage.success('修改成功')
     } else {
       await createDepartment(dialog.form)
