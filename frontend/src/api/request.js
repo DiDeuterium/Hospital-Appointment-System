@@ -3,9 +3,9 @@ import { ElMessage } from 'element-plus'
 import { getToken, clearAuth } from '@/utils/storage'
 import { BIZ_CODE } from '@/utils/constants'
 
-// 开发期保护：在本地环境，任何 401 都不触发强制登出
-const isLocalDev = typeof location !== 'undefined'
-  && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+// 开发期保护：只有 BYPASS_AUTH 注入的 mock token 才豁免 401 处理
+// 真实账号的真实 401（如后端重启导致 tokenStore 清空）一律按失效处理
+const isMockToken = () => getToken() === 'dev-mock'
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -36,10 +36,9 @@ service.interceptors.response.use(
 
     const msg = res.message || '请求失败'
 
-    // 401 在本地开发 / mock token 时：不弹错误，不登出，静默失败
-    if (res.code === BIZ_CODE.UNAUTHORIZED && (getToken() === 'dev-mock' || isLocalDev)) {
-      // 开发模式下保留错误消息让调用方自行决定是否弹窗（挂号等写操作需要提示用户）
-      console.warn('[DEV] API 返回 401，已跳过登出:', msg)
+    // 401 仅在 mock token 时静默，其他一律视为登录失效
+    if (res.code === BIZ_CODE.UNAUTHORIZED && isMockToken()) {
+      console.warn('[DEV] mock token 401，已跳过登出:', msg)
       return Promise.reject(new Error('[开发模式] ' + (msg || '请使用真实账号登录后重试')))
     }
 
@@ -61,8 +60,8 @@ service.interceptors.response.use(
     const data = error.response?.data
     const msg = data?.message || error.message || '网络异常，请稍后重试'
 
-    if (status === 401 && (getToken() === 'dev-mock' || isLocalDev)) {
-      console.warn('[DEV] HTTP 401，已跳过登出:', msg)
+    if (status === 401 && isMockToken()) {
+      console.warn('[DEV] mock token HTTP 401，已跳过登出:', msg)
       return Promise.reject(new Error('[开发模式] ' + (msg || '请使用真实账号登录后重试')))
     }
 

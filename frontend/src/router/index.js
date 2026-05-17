@@ -5,7 +5,7 @@ import doctorRoutes from './routes/doctor'
 import adminRoutes from './routes/admin'
 import { useUserStore } from '@/stores/user'
 import { ROLE } from '@/utils/constants'
-import { patientLogin, doctorLogin, adminLogin } from '@/api/auth'
+import { patientLogin, doctorLogin, adminLogin, getMe } from '@/api/auth'
 
 const HOME_BY_ROLE = {
   [ROLE.PATIENT]: '/patient/home',
@@ -119,6 +119,10 @@ function buildProfile(role, data) {
 }
 // ======================================
 
+// 本次页面加载内只校验一次 token（避免每次导航都打 /me）
+// 校验失败 → 清空登录态 + 跳登录；校验通过 → 标记，后续导航直接放行
+let bootValidated = false
+
 router.beforeEach(async (to) => {
   const user = useUserStore()
   if (to.meta.title) {
@@ -155,6 +159,20 @@ router.beforeEach(async (to) => {
   if (!user.isLoggedIn) {
     ElMessage.warning('请先登录')
     return { path: '/login', query: { redirect: to.fullPath } }
+  }
+
+  // 本次页面加载首次进入受保护路由时，校验 token 是否仍在后端 tokenStore 中
+  // 解决"后端重启 → 旧 token 失效，但 localStorage 还保留登录态" 的假登录问题
+  if (!bootValidated) {
+    try {
+      await getMe()
+      bootValidated = true
+    } catch {
+      // 后端已判定 token 失效；request.js 拦截器已弹"登录已过期"并清 localStorage
+      // 这里只需同步 store 的 reactive 状态，并把当前导航打回登录页
+      user.logout()
+      return { path: '/login', query: { redirect: to.fullPath } }
+    }
   }
 
   // 角色不匹配
