@@ -6,6 +6,7 @@ import com.hospital.dto.response.AppointmentVO;
 import com.hospital.entity.Appointment;
 import com.hospital.entity.Department;
 import com.hospital.entity.Doctor;
+import com.hospital.entity.Patient;
 import com.hospital.entity.Schedule;
 import com.hospital.exception.BusinessException;
 import com.hospital.mapper.*;
@@ -26,15 +27,18 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final ScheduleMapper scheduleMapper;
     private final DoctorMapper doctorMapper;
     private final DepartmentMapper departmentMapper;
+    private final PatientMapper patientMapper;
 
     public AppointmentServiceImpl(AppointmentMapper appointmentMapper,
                                    ScheduleMapper scheduleMapper,
                                    DoctorMapper doctorMapper,
-                                   DepartmentMapper departmentMapper) {
+                                   DepartmentMapper departmentMapper,
+                                   PatientMapper patientMapper) {
         this.appointmentMapper = appointmentMapper;
         this.scheduleMapper = scheduleMapper;
         this.doctorMapper = doctorMapper;
         this.departmentMapper = departmentMapper;
+        this.patientMapper = patientMapper;
     }
 
     @Override
@@ -106,8 +110,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<AppointmentVO> listBySchedule(Integer scheduleId) {
         LambdaQueryWrapper<Appointment> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Appointment::getScheduleId, scheduleId)
-                .eq(Appointment::getStatus, 1);
+        wrapper.eq(Appointment::getScheduleId, scheduleId);
         wrapper.orderByAsc(Appointment::getCreateTime);
         return buildVOList(appointmentMapper.selectList(wrapper));
     }
@@ -140,12 +143,28 @@ public class AppointmentServiceImpl implements AppointmentService {
             deptMap.put(d.getDeptId(), d);
         }
 
+        Set<Integer> patientIds = appointments.stream()
+                .map(Appointment::getPatientId).collect(Collectors.toSet());
+        Map<Integer, Patient> patientMap = new HashMap<>();
+        if (!patientIds.isEmpty()) {
+            for (Patient p : patientMapper.selectBatchIds(patientIds)) {
+                patientMap.put(p.getPatientId(), p);
+            }
+        }
+
         return appointments.stream().map(appt -> {
             AppointmentVO vo = new AppointmentVO();
             vo.setApptId(appt.getApptId());
             vo.setScheduleId(appt.getScheduleId());
+            vo.setPatientId(appt.getPatientId());
             vo.setStatus(appt.getStatus());
             vo.setCreateTime(appt.getCreateTime());
+
+            Patient patient = patientMap.get(appt.getPatientId());
+            if (patient != null) {
+                vo.setRealName(patient.getRealName());
+                vo.setPhone(patient.getPhone());
+            }
 
             Schedule schedule = scheduleMap.get(appt.getScheduleId());
             if (schedule != null) {
