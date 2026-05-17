@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 public class AppointmentVO {
     private Integer apptId;
     private Integer scheduleId;
+    private Integer patientId;
+    private String realName;
+    private String phone;
     private String deptName;
     private String docName;
     private LocalDate workDate;
