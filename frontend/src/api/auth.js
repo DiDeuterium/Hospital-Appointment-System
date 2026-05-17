@@ -17,3 +17,8 @@ export function doctorLogin(data) {
 export function adminLogin(data) {
   return request.post('/admin/login', data)
 }
+
+// 校验当前 token 是否仍有效（后端 LoginService.tokenStore 是内存版，重启会失效）
+export function getMe() {
+  return request.get('/auth/me')
+}
