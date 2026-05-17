@@ -70,7 +70,7 @@ const router = createRouter({
 //   - 登录成功后 token 缓存到 sessionStorage，同标签页内不复登
 //   - 登录失败则回退到 mock 假 token（只可读，不可写）
 // ⚠ 上线/联调前必须改回 false 并删除本节全部逻辑。
-const BYPASS_AUTH = true
+const BYPASS_AUTH = false
 const DEMO_CREDENTIALS = {
   patient: { login: patientLogin, payload: { idCard: '110101199001011234', password: '123456' } },
   doctor:  { login: doctorLogin,  payload: { docId: 'DOC001', password: '123456' } },
@@ -119,9 +119,22 @@ function buildProfile(role, data) {
 }
 // ======================================
 
-// 本次页面加载内只校验一次 token（避免每次导航都打 /me）
-// 校验失败 → 清空登录态 + 跳登录；校验通过 → 标记，后续导航直接放行
-let bootValidated = false
+function roleFromPath(path) {
+  if (path.startsWith('/patient')) return 'patient'
+  if (path.startsWith('/doctor')) return 'doctor'
+  if (path.startsWith('/admin')) return 'admin'
+  return null
+}
+
+// BYPASS_AUTH 注入或重注入一次 demo 登录态
+async function bypassInject(role, user) {
+  const real = await tryDemoLogin(role)
+  if (real) {
+    user.login({ role, token: real.token, profile: buildProfile(role, real.raw) })
+  } else {
+    user.login({ role, token: 'dev-mock', profile: MOCK_PROFILES[role] })
+  }
+}
 
 router.beforeEach(async (to) => {
   const user = useUserStore()
@@ -129,49 +142,51 @@ router.beforeEach(async (to) => {
     document.title = `${to.meta.title} - ${import.meta.env.VITE_APP_TITLE || '医院预约挂号系统'}`
   }
 
-  if (BYPASS_AUTH) {
-    const targetRole =
-      to.path.startsWith('/patient') ? 'patient' :
-      to.path.startsWith('/doctor') ? 'doctor' :
-      to.path.startsWith('/admin') ? 'admin' : null
-    const isMock = user.token === 'dev-mock' || !user.token
-
-    if (targetRole && isMock) {
-      // 尝试用测试账号真实登录
-      const real = await tryDemoLogin(targetRole)
-      if (real) {
-        user.login({
-          role: targetRole,
-          token: real.token,
-          profile: buildProfile(targetRole, real.raw)
-        })
-      } else {
-        user.login({ role: targetRole, token: 'dev-mock', profile: MOCK_PROFILES[targetRole] })
-      }
-    }
-    return true
+  // 已登录用户访问 /login / /register → 直接跳到对应主页（带 redirect 时跳 redirect）
+  // 防止脏状态：已经登录还看到登录表单、提交后又叠加一次登录态
+  if ((to.path === '/login' || to.path === '/register') && user.isLoggedIn && user.token !== 'dev-mock') {
+    const redirect = typeof to.query.redirect === 'string' ? to.query.redirect : null
+    return redirect || HOME_BY_ROLE[user.role] || '/'
   }
 
-  // 公共路由放行
+  // 公共路由（/login /register /403 /404）：未登录或 dev-mock 状态时放行
   if (to.meta.public) return true
 
-  // 未登录
+  // BYPASS_AUTH 模式：访问 /patient|/doctor|/admin 时若无登录态，自动注入 demo 登录
+  if (BYPASS_AUTH) {
+    const role = roleFromPath(to.path)
+    if (role && (user.token === 'dev-mock' || !user.token)) {
+      await bypassInject(role, user)
+    }
+  }
+
+  // 未登录 → 跳 /login
   if (!user.isLoggedIn) {
     ElMessage.warning('请先登录')
     return { path: '/login', query: { redirect: to.fullPath } }
   }
 
-  // 本次页面加载首次进入受保护路由时，校验 token 是否仍在后端 tokenStore 中
-  // 解决"后端重启 → 旧 token 失效，但 localStorage 还保留登录态" 的假登录问题
-  if (!bootValidated) {
+  // 真实 token：每次导航都向后端校验是否仍在 tokenStore 中
+  // 这是真正"全局"的守卫——任何时刻后端清掉 token，下次导航就会被拦下
+  // dev-mock 跳过（无法对后端验真，专给 BYPASS 后端未启动时用）
+  if (user.token !== 'dev-mock') {
     try {
       await getMe()
-      bootValidated = true
     } catch {
-      // 后端已判定 token 失效；request.js 拦截器已弹"登录已过期"并清 localStorage
-      // 这里只需同步 store 的 reactive 状态，并把当前导航打回登录页
+      // token 失效：先清当前登录态 + 清 BYPASS 缓存
       user.logout()
-      return { path: '/login', query: { redirect: to.fullPath } }
+      try { sessionStorage.removeItem(DEMO_TOKEN_KEY) } catch { /* ignore */ }
+
+      // BYPASS_AUTH 模式：尝试 silent 重新 demo 登录，避免打断 dev 体验
+      if (BYPASS_AUTH) {
+        const role = roleFromPath(to.path)
+        if (role) await bypassInject(role, user)
+      }
+
+      // 重登失败（生产模式或 BYPASS 后端未启动）→ 踢到登录页
+      if (!user.isLoggedIn || user.token === 'dev-mock') {
+        return { path: '/login', query: { redirect: to.fullPath } }
+      }
     }
   }
 
