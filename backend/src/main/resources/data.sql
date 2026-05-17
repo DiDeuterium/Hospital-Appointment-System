@@ -47,11 +47,11 @@ INSERT INTO patient (id_card, real_name, gender, phone, password) VALUES
 ('320105199404096667', '沈秀英', 'F', '13300002222', '$2b$10$h2AC4.HsLyWKEKFR5rWTTOU.vxa8LdioeWwVPFk0iukZwYVkSYS3i');
 
 -- 排班 (16 条, 包含过去/今天/未来日期)
--- rest_quota = total_quota - 当前 status=1 的挂号数
+-- rest_quota = total_quota - count(status=1或3的挂号); status=2(已取消)不占号源
 INSERT INTO schedule (doc_id, work_date, shift, total_quota, rest_quota) VALUES
-(1,  '2026-05-01', '上午', 30, 30),   -- 过去排班, 0 个 active
-(1,  '2026-05-02', '下午', 20, 20),   -- 过去排班, 0 个 active
-(3,  '2026-05-03', '上午', 25, 25),   -- 过去排班, 0 个 active
+(1,  '2026-05-01', '上午', 30, 28),   -- 过去排班, 2 个已就诊 (appt 1,2)
+(1,  '2026-05-02', '下午', 20, 19),   -- 过去排班, 1 个已就诊 (appt 4)
+(3,  '2026-05-03', '上午', 25, 24),   -- 过去排班, 1 个已就诊 (appt 5)
 (1,  '2026-05-16', '上午', 30, 28),   -- 2 个 active (appt 6,7)
 (2,  '2026-05-16', '上午',  2,  0),   -- 2 个 active (appt 8,9) — 已约满
 (3,  '2026-05-16', '下午', 20, 19),   -- 1 个 active (appt 10)
