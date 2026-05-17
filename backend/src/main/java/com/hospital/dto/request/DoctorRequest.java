@@ -20,6 +20,6 @@ public class DoctorRequest {
     @NotBlank(message = "所属科室不能为空")
     private String deptId;
 
-    @NotBlank(message = "密码不能为空")
+    // 新增时必填，修改时为空表示保留原密码（具体校验在 DoctorServiceImpl.add 中）
     private String password;
 }
