@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { listDepartments } from '@/api/department'
 import { listDoctors } from '@/api/doctor'
-import { listSchedules } from '@/api/schedule'
+import { listAdminSchedules } from '@/api/schedule'
 import { deptIcon } from '@/utils/booking'
 import StatCard from '@/components/StatCard.vue'
 import SectionCard from '@/components/SectionCard.vue'
@@ -17,7 +17,7 @@ async function load() {
     const [depts, doctors, schedules] = await Promise.all([
       listDepartments({ keyword: '' }),
       listDoctors({ deptId: '' }),
-      listSchedules({ deptId: '' })
+      listAdminSchedules()
     ])
 
     // 基础统计

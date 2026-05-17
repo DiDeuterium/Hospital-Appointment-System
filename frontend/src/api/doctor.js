@@ -5,13 +5,13 @@ export function listDoctors(params) {
 }
 
 export function createDoctor(data) {
-  return request.post('/doctors', data)
+  return request.post('/admin/doctors', data)
 }
 export function updateDoctor(docId, data) {
-  return request.put(`/doctors/${docId}`, data)
+  return request.put(`/admin/doctors/${docId}`, data)
 }
 export function deleteDoctor(docId) {
-  return request.delete(`/doctors/${docId}`)
+  return request.delete(`/admin/doctors/${docId}`)
 }
 
 // 医生本人：我的排班

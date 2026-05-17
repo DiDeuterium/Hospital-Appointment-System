@@ -49,9 +49,9 @@ async function submit() {
   await formRef.value.validate()
   try {
     if (dialog.isEdit) {
-      const { docId, ...rest } = dialog.form
-      if (!rest.password) delete rest.password
-      await updateDoctor(docId, rest)
+      const payload = { ...dialog.form }
+      if (!payload.password) delete payload.password
+      await updateDoctor(payload.docId, payload)
       ElMessage.success('修改成功')
     } else {
       await createDoctor(dialog.form)
