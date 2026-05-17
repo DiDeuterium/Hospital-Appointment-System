@@ -139,13 +139,15 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (schedule == null) {
             throw new BusinessException(404, "排班不存在");
         }
-        schedule.setWorkDate(request.getWorkDate());
-        schedule.setShift(request.getShift());
-        // Allow updating total quota, adjust rest quota accordingly
         int diff = request.getTotalQuota() - schedule.getTotalQuota();
-        schedule.setTotalQuota(request.getTotalQuota());
-        schedule.setRestQuota(schedule.getRestQuota() + diff);
-        scheduleMapper.updateById(schedule);
+        // LambdaUpdateWrapper：只更新指定字段，避开 updateById 全字段（含 docId）UPDATE
+        scheduleMapper.update(null,
+                new com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<Schedule>()
+                        .eq(Schedule::getScheduleId, scheduleId)
+                        .set(Schedule::getWorkDate, request.getWorkDate())
+                        .set(Schedule::getShift, request.getShift())
+                        .set(Schedule::getTotalQuota, request.getTotalQuota())
+                        .set(Schedule::getRestQuota, schedule.getRestQuota() + diff));
     }
 
     @Override

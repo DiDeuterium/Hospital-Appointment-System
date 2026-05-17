@@ -64,9 +64,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStatus(1);
         appointmentMapper.insert(appointment);
 
-        // Decrement rest quota
-        schedule.setRestQuota(schedule.getRestQuota() - 1);
-        scheduleMapper.updateById(schedule);
+        // Decrement rest quota（定向更新，避开 docId String/INT 类型不匹配）
+        scheduleMapper.updateRestQuota(schedule.getScheduleId(), schedule.getRestQuota() - 1);
 
         return buildVO(appointment);
     }
@@ -86,11 +85,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStatus(2);
         appointmentMapper.updateById(appointment);
 
-        // Increment rest quota
+        // Increment rest quota（定向更新，避开 docId String/INT 类型不匹配）
         Schedule schedule = scheduleMapper.selectById(appointment.getScheduleId());
         if (schedule != null) {
-            schedule.setRestQuota(schedule.getRestQuota() + 1);
-            scheduleMapper.updateById(schedule);
+            scheduleMapper.updateRestQuota(schedule.getScheduleId(), schedule.getRestQuota() + 1);
         }
     }
 

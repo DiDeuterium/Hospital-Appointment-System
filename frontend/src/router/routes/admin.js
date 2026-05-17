@@ -7,8 +7,14 @@ export default [
     path: '/admin',
     component: () => import('@/layouts/DefaultLayout.vue'),
     meta,
-    redirect: '/admin/departments',
+    redirect: '/admin/dashboard',
     children: [
+      {
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: () => import('@/views/admin/Dashboard.vue'),
+        meta: { ...meta, title: '数据看板', icon: 'dashboard' }
+      },
       {
         path: 'departments',
         name: 'AdminDepartments',

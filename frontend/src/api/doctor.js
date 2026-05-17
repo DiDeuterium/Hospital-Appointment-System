@@ -1,7 +1,7 @@
 import request from './request'
 
 export function listDoctors(params) {
-  return request.get('/doctors', { params })
+  return request.get('/admin/doctors', { params })
 }
 
 export function createDoctor(data) {
