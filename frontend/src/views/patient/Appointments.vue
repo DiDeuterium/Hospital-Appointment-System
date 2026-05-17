@@ -13,8 +13,8 @@ import EmptyState from '@/components/EmptyState.vue'
 
 const router = useRouter()
 const user = useUserStore()
-const list = ref([])
-const status = ref('')
+const allList = ref([])
+const tab = ref('')
 const loading = ref(false)
 
 const statusTabs = [
@@ -28,10 +28,16 @@ const counts = computed(() => {
   const map = {}
   for (const t of statusTabs) {
     map[t.key] = t.key
-      ? list.value.filter(a => String(a.status) === t.key).length
-      : list.value.length
+      ? allList.value.filter(a => String(a.status) === t.key).length
+      : allList.value.length
   }
   return map
+})
+
+const list = computed(() => {
+  if (!tab.value) return allList.value
+  const n = Number(tab.value)
+  return allList.value.filter(a => a.status === n)
 })
 
 const tagTypeMap = {
@@ -42,11 +48,10 @@ const tagTypeMap = {
 
 async function load() {
   const pid = user.profile?.patientId
-  if (!pid) { list.value = []; return }
+  if (!pid) { allList.value = []; return }
   loading.value = true
   try {
-    const params = status.value ? { status: Number(status.value) } : {}
-    list.value = await listMyAppointments(pid, params)
+    allList.value = await listMyAppointments(pid)
   } catch { /* 拦截器已弹错误 */ } finally {
     loading.value = false
   }
@@ -75,7 +80,7 @@ onMounted(load)
   <div class="page-container">
     <PageHeader
       title="我的预约"
-      :subtitle="'共 ' + list.length + ' 条预约记录'"
+      :subtitle="'共 ' + allList.length + ' 条预约记录'"
       :breadcrumbs="[{ label: '首页', to: '/patient/home' }, { label: '我的预约' }]"
     />
 
@@ -86,8 +91,8 @@ onMounted(load)
         :key="t.key"
         type="button"
         class="tabs__btn"
-        :class="{ 'is-active': status === t.key }"
-        @click="status = t.key; load()"
+        :class="{ 'is-active': tab === t.key }"
+        @click="tab = t.key"
       >
         {{ t.label }}
         <span class="tabs__count">{{ counts[t.key] || 0 }}</span>
@@ -139,9 +144,9 @@ onMounted(load)
       <EmptyState
         v-else-if="!loading"
         title="暂无预约记录"
-        :description="status ? '当前筛选条件下没有预约' : '还没有预约过，去首页开始挂号吧'"
+        :description="tab ? '当前筛选条件下没有预约' : '还没有预约过，去首页开始挂号吧'"
       >
-        <template v-if="!status" #action>
+        <template v-if="!tab" #action>
           <el-button type="primary" @click="router.push('/patient/departments')">去挂号</el-button>
         </template>
       </EmptyState>
