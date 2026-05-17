@@ -47,6 +47,8 @@ service.interceptors.response.use(
     if (res.code === BIZ_CODE.UNAUTHORIZED) {
       clearAuth()
       setTimeout(() => {
+        // 期间若已被重新认证（如路由守卫的 BYPASS silent 重登），不强制跳转
+        if (getToken()) return
         if (location.hash !== '#/login' && location.pathname !== '/login') {
           location.href = '/login'
         }
@@ -68,7 +70,10 @@ service.interceptors.response.use(
     ElMessage.error(msg)
     if (status === 401) {
       clearAuth()
-      setTimeout(() => { location.href = '/login' }, 300)
+      setTimeout(() => {
+        if (getToken()) return
+        if (location.pathname !== '/login') location.href = '/login'
+      }, 300)
     }
     return Promise.reject(new Error(msg))
   }
