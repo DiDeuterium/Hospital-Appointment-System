@@ -62,7 +62,7 @@ async function submit() {
 }
 async function remove(row) {
   try {
-    await ElMessageBox.confirm('确定删除该医生？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定删除该医生？', '提示', { type: 'warning', lockScroll: false })
     await deleteDoctor(row.docId)
     ElMessage.success('已删除'); load()
   } catch {}
@@ -134,7 +134,7 @@ onMounted(() => { loadDepts(); load() })
       </article>
     </div>
 
-    <el-dialog v-model="dialog.visible" :title="dialog.isEdit ? '修改医生' : '新增医生'" width="500px">
+    <el-dialog v-model="dialog.visible" :title="dialog.isEdit ? '修改医生' : '新增医生'" width="500px" :lock-scroll="false">
       <el-form ref="formRef" :model="dialog.form" :rules="rules" label-position="top">
         <el-form-item label="工号" prop="docId">
           <el-input v-model="dialog.form.docId" :disabled="dialog.isEdit" size="large" />

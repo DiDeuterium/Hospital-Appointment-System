@@ -141,6 +141,16 @@
 .el-message-box { border-radius: var(--app-radius-xl); }
 .el-message-box__title { font-size: var(--app-fs-h3); }
 
+// 弹窗打开时禁止 Element Plus 给 body 加宽度补偿
+// 配合 index.scss 的 `html { scrollbar-gutter: stable; }`：
+//   - 滚动条空间已永远保留在 html 上，弹窗时滚动条根本不会"消失"
+//   - 但 Element Plus 的 useLockscreen 不知情，仍把 body width 改为 calc(100% - 15px)
+//   - 结果：弹窗开 → body 收缩 15px；关 → 弹回，肉眼可见抖动
+// 用 !important 覆盖它设的 inline style.width
+body.el-popup-parent--hidden {
+  width: 100% !important;
+}
+
 // ---- Radio Button（角色 Tab、状态过滤用）----
 .el-radio-button__inner {
   border-radius: 0;

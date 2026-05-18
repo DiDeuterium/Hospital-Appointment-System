@@ -59,7 +59,7 @@ async function load() {
 
 async function cancel(row) {
   try {
-    await ElMessageBox.confirm('确定取消该预约吗？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定取消该预约吗？', '提示', { type: 'warning', lockScroll: false })
     await cancelAppointment(row.apptId)
     ElMessage.success('已取消')
     load()

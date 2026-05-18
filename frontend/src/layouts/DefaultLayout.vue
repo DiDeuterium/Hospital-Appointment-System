@@ -34,5 +34,6 @@ import AppHeader from './components/AppHeader.vue'
 .default-layout__main {
   flex: 1;
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 </style>
