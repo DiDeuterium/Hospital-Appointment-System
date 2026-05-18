@@ -51,7 +51,7 @@ async function submit() {
 }
 async function remove(row) {
   try {
-    await ElMessageBox.confirm('确定删除该科室？若有医生关联将无法删除', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定删除该科室？若有医生关联将无法删除', '提示', { type: 'warning', lockScroll: false })
     await deleteDepartment(row.deptId)
     ElMessage.success('已删除')
     load()
@@ -95,7 +95,7 @@ onMounted(load)
     </div>
 
     <!-- 弹窗 -->
-    <el-dialog v-model="dialog.visible" :title="dialog.isEdit ? '修改科室' : '新增科室'" width="480px">
+    <el-dialog v-model="dialog.visible" :title="dialog.isEdit ? '修改科室' : '新增科室'" width="480px" :lock-scroll="false">
       <el-form ref="formRef" :model="dialog.form" :rules="rules" label-position="top">
         <el-form-item label="科室编号" prop="deptId">
           <el-input v-model="dialog.form.deptId" :disabled="dialog.isEdit" size="large" />

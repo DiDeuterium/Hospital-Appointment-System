@@ -27,7 +27,7 @@ const fieldConfig = computed(() => {
     return { key: 'idCard', label: '身份证号', placeholder: '请输入 18 位身份证号' }
   }
   if (role.value === ROLE.DOCTOR) {
-    return { key: 'docId', label: '医生工号', placeholder: '如 DOC001' }
+    return { key: 'docId', label: '医生工号', placeholder: '如 "1"' }
   }
   return { key: 'username', label: '管理员账号', placeholder: '请输入管理员账号' }
 })

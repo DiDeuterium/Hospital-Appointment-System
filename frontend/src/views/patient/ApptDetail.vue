@@ -34,7 +34,7 @@ const tagTypeMap = {
 async function doCancel() {
   if (!appt.value) return
   try {
-    await ElMessageBox.confirm('确定取消该预约吗？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定取消该预约吗？', '提示', { type: 'warning', lockScroll: false })
     cancelLoading.value = true
     await cancelAppointment(appt.value.apptId)
     ElMessage.success('已取消')

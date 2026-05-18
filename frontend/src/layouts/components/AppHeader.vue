@@ -10,7 +10,7 @@ const user = useUserStore()
 
 async function handleLogout() {
   try {
-    await ElMessageBox.confirm('确定退出登录？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定退出登录？', '提示', { type: 'warning', lockScroll: false })
     user.logout()
     router.replace('/login')
   } catch { /* 取消 */ }

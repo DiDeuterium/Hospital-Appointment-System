@@ -16,7 +16,7 @@ const menus = [
 
 async function handleLogout() {
   try {
-    await ElMessageBox.confirm('确定退出登录？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定退出登录？', '提示', { type: 'warning', lockScroll: false })
     user.logout()
     router.replace('/login')
   } catch { /* 用户取消 */ }
@@ -83,10 +83,13 @@ function isActive(to) {
   max-width: var(--app-content-max-width);
   margin: 0 auto;
   height: 100%;
-  display: flex;
+  /* 三段对齐：logo 左 / 菜单中 / 用户右
+     用 1fr auto 1fr 网格保证左右两栏等宽，中间菜单严格居中 */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 0 var(--app-sp-6);
-  gap: var(--app-sp-8);
+  gap: var(--app-sp-4);
 }
 
 .navbar__brand {
@@ -96,6 +99,8 @@ function isActive(to) {
   color: var(--app-text-1);
   font-weight: 600;
   font-size: var(--app-fs-h3);
+  /* 占据左栏，内容靠左 */
+  justify-self: start;
 }
 .navbar__brand-mark {
   display: inline-flex;
@@ -112,7 +117,8 @@ function isActive(to) {
 .navbar__menu {
   display: flex;
   gap: 4px;
-  flex: 1;
+  /* 中栏：菜单项整体居中 */
+  justify-self: center;
 }
 .navbar__item {
   padding: 0 var(--app-sp-4);
@@ -145,6 +151,11 @@ function isActive(to) {
   color: var(--app-text-2);
 }
 .navbar__user:hover { background: var(--app-bg-subtle); }
+
+/* 右栏：用户区靠右 */
+.navbar__right {
+  justify-self: end;
+}
 .navbar__avatar {
   width: 28px;
   height: 28px;

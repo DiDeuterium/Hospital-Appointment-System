@@ -60,7 +60,7 @@ async function submit() {
 }
 async function remove(row) {
   try {
-    await ElMessageBox.confirm('确定删除该排班？若已有预约将无法删除', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确定删除该排班？若已有预约将无法删除', '提示', { type: 'warning', lockScroll: false })
     await deleteSchedule(row.scheduleId)
     ElMessage.success('已删除'); load()
   } catch {}
@@ -113,7 +113,7 @@ onMounted(() => { loadDoctors(); load() })
     </div>
 
     <!-- 弹窗 -->
-    <el-dialog v-model="dialog.visible" :title="dialog.isEdit ? '修改排班' : '发布排班'" width="480px">
+    <el-dialog v-model="dialog.visible" :title="dialog.isEdit ? '修改排班' : '发布排班'" width="480px" :lock-scroll="false">
       <el-form ref="formRef" :model="dialog.form" :rules="rules" label-position="top">
         <el-form-item label="医生" prop="docId">
           <el-select v-model="dialog.form.docId" placeholder="选择医生" size="large" :disabled="dialog.isEdit" style="width:100%">

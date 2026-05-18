@@ -9,6 +9,12 @@ html, body, #app {
   padding: 0;
 }
 
+// 永远为垂直滚动条预留空间，防止内容多/少切换时整体布局横向"抖动" 15px
+// 影响范围：所有 body 级别的滚动（患者端 / 登录页等）
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB',
