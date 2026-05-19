@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { listMyAppointments } from '@/api/appointment'
@@ -15,14 +15,15 @@ import SectionCard from '@/components/SectionCard.vue'
 const router = useRouter()
 const user = useUserStore()
 
-const recentAppt = ref(null)
+const allAppts = ref([])
 const hotDepts = ref([])
 const loading = ref(false)
 
+// 去重后的三个入口：科室挂号 / 我的预约 / 个人中心
 const shortcuts = [
-  { label: '科室挂号', icon: 'building', to: '/patient/departments' },
-  { label: '我的预约', icon: 'calendar-check', to: '/patient/appointments' },
-  { label: '预约管理', icon: 'file-text', to: '/patient/appointments' }
+  { label: '科室挂号', icon: 'building',        to: '/patient/departments' },
+  { label: '我的预约', icon: 'calendar-check',  to: '/patient/appointments' },
+  { label: '个人中心', icon: 'user',            to: '/patient/profile' }
 ]
 
 const tips = [
@@ -31,16 +32,28 @@ const tips = [
   '如有发热、咳嗽等症状，请前往发热门诊'
 ]
 
+// 统计：待就诊 / 已就诊 / 累计
+const stats = computed(() => {
+  const booked    = allAppts.value.filter(a => a.status === APPT_STATUS.BOOKED).length
+  const finished  = allAppts.value.filter(a => a.status === APPT_STATUS.FINISHED).length
+  return { booked, finished, total: allAppts.value.length }
+})
+
+// 最近一条待就诊
+const recentAppt = computed(() => {
+  return allAppts.value.find(a => a.status === APPT_STATUS.BOOKED) || null
+})
+
 onMounted(async () => {
   loading.value = true
   try {
     const pid = user.profile?.patientId
     const [depts, appts] = await Promise.all([
       listDepartments(),
-      pid ? listMyAppointments(pid, { status: APPT_STATUS.BOOKED }).catch(() => []) : []
+      pid ? listMyAppointments(pid).catch(() => []) : []
     ])
     hotDepts.value = depts.slice(0, 4)
-    recentAppt.value = Array.isArray(appts) && appts.length ? appts[0] : null
+    allAppts.value = Array.isArray(appts) ? appts : []
   } catch { /* 后端没起时静默 */ } finally {
     loading.value = false
   }
@@ -49,7 +62,7 @@ onMounted(async () => {
 
 <template>
   <div class="page-container">
-    <!-- 欢迎横幅 -->
+    <!-- 欢迎横幅（精简版：问候 + 立即挂号 CTA） -->
     <section class="hero">
       <div class="hero__body">
         <h1 class="hero__greeting">你好，{{ user.displayName || '用户' }}</h1>
@@ -63,7 +76,14 @@ onMounted(async () => {
       </div>
     </section>
 
-    <!-- 我的预约提醒 -->
+    <!-- 数据 Dashboard：三张统计卡片 -->
+    <div class="stats">
+      <StatCard label="待就诊" :value="stats.booked" unit="条" icon="calendar" tone="brand" />
+      <StatCard label="已就诊" :value="stats.finished" unit="条" icon="check-circle" tone="success" />
+      <StatCard label="累计预约" :value="stats.total" unit="条" icon="file-text" tone="info" />
+    </div>
+
+    <!-- 最近预约 / 空状态 -->
     <SectionCard v-if="recentAppt" title="最近预约" class="section-gap">
       <template #extra>
         <router-link to="/patient/appointments">查看全部</router-link>
@@ -84,9 +104,8 @@ onMounted(async () => {
       </div>
     </SectionCard>
 
-    <!-- 最近预约为空时温和提示 -->
     <SectionCard v-else title="我的预约" class="section-gap">
-      <EmptyState title="暂无预约" description="您还没有预约记录，点击下方按钮开始挂号" :style="{ padding: 'var(--app-sp-8) 0' }">
+      <EmptyState title="暂无待就诊预约" description="您还没有待就诊的预约，点击下方按钮开始挂号" :style="{ padding: 'var(--app-sp-8) 0' }">
         <template #action>
           <el-button type="primary" @click="router.push('/patient/departments')">去挂号</el-button>
         </template>
@@ -178,6 +197,14 @@ onMounted(async () => {
   margin-top: var(--app-sp-2);
 }
 .hero__cta { flex-shrink: 0; }
+
+/* ---- 统计卡片排 ---- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--app-sp-4);
+  margin-bottom: var(--app-sp-6);
+}
 
 /* ---- 预约提醒 ---- */
 .reminder {
@@ -312,6 +339,9 @@ onMounted(async () => {
   .hero {
     flex-direction: column;
     text-align: center;
+  }
+  .stats {
+    grid-template-columns: 1fr;
   }
   .reminder { flex-direction: column; align-items: flex-start; }
 }

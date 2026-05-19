@@ -62,6 +62,12 @@ export default [
         name: 'PatientApptDetail',
         component: () => import('@/views/patient/ApptDetail.vue'),
         meta: { ...meta, title: '预约详情', hidden: true }
+      },
+      {
+        path: 'profile',
+        name: 'PatientProfile',
+        component: () => import('@/views/patient/Profile.vue'),
+        meta: { ...meta, title: '个人中心' }
       }
     ]
   }

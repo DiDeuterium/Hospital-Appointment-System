@@ -60,7 +60,7 @@ function isActive(to) {
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item @click="router.push('/patient/appointments')">我的预约</el-dropdown-item>
+              <el-dropdown-item @click="router.push('/patient/profile')">个人中心</el-dropdown-item>
               <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>

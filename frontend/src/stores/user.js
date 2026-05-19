@@ -41,6 +41,13 @@ export const useUserStore = defineStore('user', () => {
     clearAuth()
   }
 
+  // 个人中心修改资料后，局部合并 profile 并同步到 localStorage，
+  // 避免覆盖 token / 触发完整 login 流程
+  function updateProfile(partial) {
+    profile.value = { ...(profile.value || {}), ...partial }
+    setUser({ role: role.value, profile: profile.value })
+  }
+
   function isRole(...roles) {
     return roles.includes(role.value)
   }
@@ -53,6 +60,7 @@ export const useUserStore = defineStore('user', () => {
     displayName,
     login,
     logout,
+    updateProfile,
     isRole,
     ROLE
   }
