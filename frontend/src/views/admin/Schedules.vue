@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listAdminSchedules, createSchedule, updateSchedule, deleteSchedule } from '@/api/schedule'
 import { listDoctors } from '@/api/doctor'
@@ -66,13 +66,30 @@ async function remove(row) {
   } catch {}
 }
 
-onMounted(() => { loadDoctors(); load() })
+const now = ref(new Date())
+const clock = computed(() => {
+  const d = now.value
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0') + ' ' +
+    d.toTimeString().slice(0, 8)
+})
+let clockTimer = null
+
+onMounted(() => {
+  loadDoctors(); load()
+  clockTimer = setInterval(() => { now.value = new Date() }, 1000)
+})
+onBeforeUnmount(() => {
+  if (clockTimer) clearInterval(clockTimer)
+})
 </script>
 
 <template>
   <div class="page-container">
     <PageHeader title="排班管理" :subtitle="'共 ' + list.length + ' 条排班'">
       <template #extra>
+        <time class="page-clock">{{ clock }}</time>
         <el-button size="large" type="primary" @click="openCreate">发布排班</el-button>
       </template>
     </PageHeader>
@@ -143,6 +160,7 @@ onMounted(() => { loadDoctors(); load() })
 <style scoped>
 .page-container { max-width: var(--app-content-max-width); margin: 0 auto; padding: var(--app-sp-6) var(--app-sp-6) var(--app-sp-12); }
 .toolbar { display: flex; gap: var(--app-sp-3); margin-bottom: var(--app-sp-6); flex-wrap: wrap; }
+.page-clock { font-size: var(--app-fs-body); color: var(--app-text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .toolbar__sel { width: 220px; }
 
 .table-wrap { background: var(--app-bg-elevated); border: 1px solid var(--app-border-light); border-radius: var(--app-radius-lg); overflow: hidden; }

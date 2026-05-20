@@ -1,9 +1,9 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { listPatientsBySchedule } from '@/api/doctor'
-import { finishAppointment } from '@/api/appointment'
+import { finishAppointment, cancelAppointment } from '@/api/appointment'
 import { APPT_STATUS, APPT_STATUS_LABEL, APPT_STATUS_TAG_TYPE } from '@/utils/constants'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusTag from '@/components/StatusTag.vue'
@@ -15,6 +15,7 @@ const list = ref([])
 const loading = ref(false)
 const statusFilter = ref('')
 const finishingId = ref(null)
+const cancellingId = ref(null)
 
 const filtered = computed(() => {
   if (!statusFilter.value) return list.value
@@ -38,6 +39,20 @@ async function doFinish(apptId) {
     await load()
   } catch { /* 拦截器已弹错误 */ } finally {
     finishingId.value = null
+  }
+}
+
+async function doCancel(apptId) {
+  try {
+    await ElMessageBox.confirm('确定将该预约标记为取消？', '提示', { type: 'warning', lockScroll: false })
+    cancellingId.value = apptId
+    await cancelAppointment(apptId)
+    ElMessage.success('已取消')
+    await load()
+  } catch (e) {
+    if (e !== 'cancel' && e?.message) ElMessage.error(e.message)
+  } finally {
+    cancellingId.value = null
   }
 }
 
@@ -105,14 +120,30 @@ onMounted(load)
               </StatusTag>
             </td>
             <td class="pt-table__time">{{ p.createTime || '—' }}</td>
-            <td>
-              <el-button
-                v-if="p.status === APPT_STATUS.BOOKED"
-                type="primary"
-                size="small"
-                :loading="finishingId === p.apptId"
-                @click="doFinish(p.apptId)"
-              >完成就诊</el-button>
+            <td class="pt-table__actions">
+              <template v-if="p.status === APPT_STATUS.BOOKED">
+                <el-button
+                  type="primary"
+                  size="small"
+                  :loading="finishingId === p.apptId"
+                  @click="doFinish(p.apptId)"
+                >完成就诊</el-button>
+              </template>
+              <template v-else-if="p.status === APPT_STATUS.EXPIRED">
+                <el-button
+                  type="success"
+                  size="small"
+                  :loading="finishingId === p.apptId"
+                  @click="doFinish(p.apptId)"
+                >补记为已就诊</el-button>
+                <el-button
+                  type="danger"
+                  size="small"
+                  plain
+                  :loading="cancellingId === p.apptId"
+                  @click="doCancel(p.apptId)"
+                >取消</el-button>
+              </template>
               <span v-else class="pt-table__no-action">—</span>
             </td>
           </tr>
@@ -150,5 +181,6 @@ onMounted(load)
 .pt-table__name { font-weight: 500; color: var(--app-text-1); }
 .pt-table__time { color: var(--app-text-3); font-size: var(--app-fs-caption); white-space: nowrap; }
 .empty { text-align: center; padding: var(--app-sp-8); color: var(--app-text-3); font-size: var(--app-fs-caption); }
+.pt-table__actions { display: flex; gap: var(--app-sp-2); align-items: center; }
 .pt-table__no-action { color: var(--app-text-4); }
 </style>

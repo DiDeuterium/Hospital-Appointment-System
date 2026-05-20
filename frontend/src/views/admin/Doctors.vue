@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listDoctors, createDoctor, updateDoctor, deleteDoctor } from '@/api/doctor'
 import { listDepartments } from '@/api/department'
@@ -72,16 +72,35 @@ function deptName(deptId) {
   return depts.value.find(d => String(d.deptId) === String(deptId))?.deptName || deptId
 }
 
-onMounted(() => { loadDepts(); load() })
+const now = ref(new Date())
+const clock = computed(() => {
+  const d = now.value
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0') + ' ' +
+    d.toTimeString().slice(0, 8)
+})
+let clockTimer = null
+
+onMounted(() => {
+  loadDepts(); load()
+  clockTimer = setInterval(() => { now.value = new Date() }, 1000)
+})
+onBeforeUnmount(() => {
+  if (clockTimer) clearInterval(clockTimer)
+})
 </script>
 
 <template>
   <div class="page-container">
     <PageHeader title="医生管理" :subtitle="'共 ' + list.length + ' 位医生'">
       <template #extra>
-        <div class="view-toggle">
-          <button class="view-toggle__btn" :class="{ 'is-active': viewMode === 'table' }" @click="viewMode = 'table'">表格</button>
-          <button class="view-toggle__btn" :class="{ 'is-active': viewMode === 'card' }" @click="viewMode = 'card'">卡片</button>
+        <div class="head-extra">
+          <time class="page-clock">{{ clock }}</time>
+          <div class="view-toggle">
+            <button class="view-toggle__btn" :class="{ 'is-active': viewMode === 'table' }" @click="viewMode = 'table'">表格</button>
+            <button class="view-toggle__btn" :class="{ 'is-active': viewMode === 'card' }" @click="viewMode = 'card'">卡片</button>
+          </div>
         </div>
       </template>
     </PageHeader>
@@ -169,6 +188,9 @@ onMounted(() => { loadDepts(); load() })
 .page-container { max-width: var(--app-content-max-width); margin: 0 auto; padding: var(--app-sp-6) var(--app-sp-6) var(--app-sp-12); }
 .toolbar { display: flex; gap: var(--app-sp-3); margin-bottom: var(--app-sp-6); align-items: center; }
 .toolbar__sel { width: 220px; }
+
+.head-extra { display: flex; align-items: center; gap: var(--app-sp-4); }
+.page-clock { font-size: var(--app-fs-body); color: var(--app-text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 .view-toggle { display: flex; border: 1px solid var(--app-border); border-radius: var(--app-radius-md); overflow: hidden; }
 .view-toggle__btn {

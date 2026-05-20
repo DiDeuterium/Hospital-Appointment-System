@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onBeforeUnmount, ref, computed } from 'vue'
 import { listDepartments } from '@/api/department'
 import { listDoctors } from '@/api/doctor'
 import { listAdminSchedules } from '@/api/schedule'
@@ -49,12 +49,33 @@ async function load() {
   }
 }
 
-onMounted(load)
+const maxCount = computed(() => deptDistribution.value[0]?.count || 0)
+
+const now = ref(new Date())
+const clock = computed(() => {
+  const d = now.value
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0') + ' ' +
+    d.toTimeString().slice(0, 8)
+})
+let clockTimer = null
+
+onMounted(() => {
+  load()
+  clockTimer = setInterval(() => { now.value = new Date() }, 1000)
+})
+onBeforeUnmount(() => {
+  if (clockTimer) clearInterval(clockTimer)
+})
 </script>
 
 <template>
   <div class="page-container">
-    <h1 class="page-title">数据看板</h1>
+    <div class="page-head">
+      <h1 class="page-title">数据看板</h1>
+      <time class="page-clock">{{ clock }}</time>
+    </div>
 
     <!-- 统计卡 -->
     <div class="stats">
@@ -75,7 +96,7 @@ onMounted(load)
           <div class="bar-chart__track">
             <div
               class="bar-chart__fill"
-              :style="{ width: Math.max(4, (d.count / deptDistribution[0].count) * 100) + '%' }"
+              :style="{ width: maxCount ? (d.count / maxCount) * 100 + '%' : '0%' }"
             />
           </div>
           <span class="bar-chart__val">{{ d.count }}</span>
@@ -106,7 +127,9 @@ onMounted(load)
 
 <style scoped>
 .page-container { max-width: var(--app-content-max-width); margin: 0 auto; padding: var(--app-sp-6) var(--app-sp-6) var(--app-sp-12); }
-.page-title { font-size: var(--app-fs-h1); font-weight: 600; color: var(--app-text-1); margin-bottom: var(--app-sp-6); }
+.page-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--app-sp-4); margin-bottom: var(--app-sp-6); }
+.page-title { font-size: var(--app-fs-h1); font-weight: 600; color: var(--app-text-1); margin: 0; }
+.page-clock { font-size: var(--app-fs-body); color: var(--app-text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .section-gap { margin-bottom: var(--app-sp-6); }
 
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--app-sp-4); margin-bottom: var(--app-sp-6); }
@@ -121,13 +144,11 @@ onMounted(load)
   display: flex; align-items: center; gap: var(--app-sp-2); overflow: hidden; white-space: nowrap;
 }
 .bar-chart__icon { font-size: 16px; flex-shrink: 0; }
-.bar-chart__icon { font-size: 14px; }
 .bar-chart__track { flex: 1; height: 24px; background: var(--app-bg-subtle); border-radius: var(--app-radius-sm); overflow: hidden; }
 .bar-chart__fill {
   height: 100%; border-radius: var(--app-radius-sm);
   background: linear-gradient(90deg, var(--app-brand-400), var(--app-brand-500));
   transition: width var(--app-transition-slow);
-  min-width: 4px;
 }
 .bar-chart__val {
   width: 32px; text-align: right; font-size: var(--app-fs-caption); font-weight: 600;

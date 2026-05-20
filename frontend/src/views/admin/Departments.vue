@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listDepartments, createDepartment, updateDepartment, deleteDepartment } from '@/api/department'
 import PageHeader from '@/components/PageHeader.vue'
@@ -58,12 +58,32 @@ async function remove(row) {
   } catch {}
 }
 
-onMounted(load)
+const now = ref(new Date())
+const clock = computed(() => {
+  const d = now.value
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0') + ' ' +
+    d.toTimeString().slice(0, 8)
+})
+let clockTimer = null
+
+onMounted(() => {
+  load()
+  clockTimer = setInterval(() => { now.value = new Date() }, 1000)
+})
+onBeforeUnmount(() => {
+  if (clockTimer) clearInterval(clockTimer)
+})
 </script>
 
 <template>
   <div class="page-container">
-    <PageHeader title="科室管理" :subtitle="'共 ' + list.length + ' 个科室'" />
+    <PageHeader title="科室管理" :subtitle="'共 ' + list.length + ' 个科室'">
+      <template #extra>
+        <time class="page-clock">{{ clock }}</time>
+      </template>
+    </PageHeader>
 
     <div class="toolbar">
       <el-input v-model="keyword" placeholder="搜索科室名称" clearable size="large" @keyup.enter="load" @clear="load" class="toolbar__search">
@@ -130,5 +150,6 @@ onMounted(load)
 .dt-table__name { font-weight: 500; color: var(--app-text-1); }
 .dt-table__desc { color: var(--app-text-3); font-size: var(--app-fs-caption); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dt-table__actions { white-space: nowrap; }
+.page-clock { font-size: var(--app-fs-body); color: var(--app-text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .empty { text-align: center; padding: var(--app-sp-8); color: var(--app-text-3); font-size: var(--app-fs-caption); }
 </style>
