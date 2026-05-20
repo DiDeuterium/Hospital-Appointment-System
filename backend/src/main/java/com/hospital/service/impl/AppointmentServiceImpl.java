@@ -83,7 +83,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appointment == null) {
             throw new BusinessException(404, "预约记录不存在");
         }
-        if (appointment.getStatus() != Appointment.STATUS_BOOKED) {
+        if (appointment.getStatus() != Appointment.STATUS_BOOKED
+                && appointment.getStatus() != Appointment.STATUS_EXPIRED) {
             throw new BusinessException(409, "该预约无法取消（已取消或已就诊）");
         }
 
@@ -105,8 +106,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appointment == null) {
             throw new BusinessException(404, "预约记录不存在");
         }
-        if (appointment.getStatus() != Appointment.STATUS_BOOKED) {
-            throw new BusinessException(409, "该预约无法完成就诊（非待就诊状态）");
+        if (appointment.getStatus() != Appointment.STATUS_BOOKED
+                && appointment.getStatus() != Appointment.STATUS_EXPIRED) {
+            throw new BusinessException(409, "该预约无法完成就诊（非待就诊或已过期状态）");
         }
 
         appointment.setStatus(Appointment.STATUS_FINISHED);
