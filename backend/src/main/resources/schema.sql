@@ -55,7 +55,7 @@ CREATE TABLE appointment (
     appt_id     INT       AUTO_INCREMENT PRIMARY KEY                              COMMENT '预约单号',
     patient_id  INT       NOT NULL                                                COMMENT '预约患者ID',
     schedule_id INT       NOT NULL                                                COMMENT '对应排班ID',
-    status      INT       NOT NULL DEFAULT 1 CHECK (status IN (1, 2, 3))         COMMENT '状态: 1已预约 2已取消 3已就诊',
+    status      INT       NOT NULL DEFAULT 1 CHECK (status IN (1, 2, 3, 4))         COMMENT '状态: 1已预约 2已取消 3已就诊 4已过期',
     create_time DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP                      COMMENT '订单创建时间',
     FOREIGN KEY (patient_id)  REFERENCES patient(patient_id)   ON DELETE RESTRICT,
     FOREIGN KEY (schedule_id) REFERENCES schedule(schedule_id) ON DELETE RESTRICT

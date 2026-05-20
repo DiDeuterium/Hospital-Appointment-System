@@ -1,7 +1,9 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { listPatientsBySchedule } from '@/api/doctor'
+import { finishAppointment } from '@/api/appointment'
 import { APPT_STATUS, APPT_STATUS_LABEL, APPT_STATUS_TAG_TYPE } from '@/utils/constants'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusTag from '@/components/StatusTag.vue'
@@ -12,6 +14,7 @@ const router = useRouter()
 const list = ref([])
 const loading = ref(false)
 const statusFilter = ref('')
+const finishingId = ref(null)
 
 const filtered = computed(() => {
   if (!statusFilter.value) return list.value
@@ -24,6 +27,17 @@ async function load() {
     list.value = await listPatientsBySchedule(route.params.scheduleId)
   } catch { /* 静默 */ } finally {
     loading.value = false
+  }
+}
+
+async function doFinish(apptId) {
+  finishingId.value = apptId
+  try {
+    await finishAppointment(apptId)
+    ElMessage.success('已完成就诊')
+    await load()
+  } catch { /* 拦截器已弹错误 */ } finally {
+    finishingId.value = null
   }
 }
 
@@ -57,6 +71,11 @@ onMounted(load)
       >已就诊 ({{ list.filter(p => p.status === APPT_STATUS.FINISHED).length }})</button>
       <button
         class="tabs__btn"
+        :class="{ 'is-active': statusFilter === String(APPT_STATUS.EXPIRED) }"
+        @click="statusFilter = String(APPT_STATUS.EXPIRED)"
+      >已过期 ({{ list.filter(p => p.status === APPT_STATUS.EXPIRED).length }})</button>
+      <button
+        class="tabs__btn"
         :class="{ 'is-active': statusFilter === String(APPT_STATUS.CANCELLED) }"
         @click="statusFilter = String(APPT_STATUS.CANCELLED)"
       >已取消 ({{ list.filter(p => p.status === APPT_STATUS.CANCELLED).length }})</button>
@@ -72,6 +91,7 @@ onMounted(load)
             <th>手机号</th>
             <th>状态</th>
             <th>挂号时间</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -80,11 +100,21 @@ onMounted(load)
             <td class="pt-table__name">{{ p.realName }}</td>
             <td>{{ (p.phone || '').replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') }}</td>
             <td>
-              <StatusTag :type="APPT_STATUS_TAG_TYPE[p.status] === 'primary' ? 'primary' : APPT_STATUS_TAG_TYPE[p.status] === 'success' ? 'success' : 'default'">
+              <StatusTag :type="APPT_STATUS_TAG_TYPE[p.status] === 'primary' ? 'primary' : APPT_STATUS_TAG_TYPE[p.status] === 'success' ? 'success' : APPT_STATUS_TAG_TYPE[p.status] === 'warning' ? 'warning' : 'default'">
                 {{ APPT_STATUS_LABEL[p.status] || '未知' }}
               </StatusTag>
             </td>
             <td class="pt-table__time">{{ p.createTime || '—' }}</td>
+            <td>
+              <el-button
+                v-if="p.status === APPT_STATUS.BOOKED"
+                type="primary"
+                size="small"
+                :loading="finishingId === p.apptId"
+                @click="doFinish(p.apptId)"
+              >完成就诊</el-button>
+              <span v-else class="pt-table__no-action">—</span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -120,4 +150,5 @@ onMounted(load)
 .pt-table__name { font-weight: 500; color: var(--app-text-1); }
 .pt-table__time { color: var(--app-text-3); font-size: var(--app-fs-caption); white-space: nowrap; }
 .empty { text-align: center; padding: var(--app-sp-8); color: var(--app-text-3); font-size: var(--app-fs-caption); }
+.pt-table__no-action { color: var(--app-text-4); }
 </style>

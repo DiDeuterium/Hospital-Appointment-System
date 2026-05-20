@@ -28,6 +28,7 @@ onMounted(() => {
 const tagTypeMap = {
   [APPT_STATUS.BOOKED]: 'primary',
   [APPT_STATUS.FINISHED]: 'success',
+  [APPT_STATUS.EXPIRED]: 'warning',
   [APPT_STATUS.CANCELLED]: 'default'
 }
 
