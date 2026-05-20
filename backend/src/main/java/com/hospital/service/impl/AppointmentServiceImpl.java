@@ -14,6 +14,8 @@ import com.hospital.service.AppointmentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +58,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         LambdaQueryWrapper<Appointment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Appointment::getPatientId, request.getPatientId())
                 .eq(Appointment::getScheduleId, request.getScheduleId())
-                .eq(Appointment::getStatus, 1);
+                .eq(Appointment::getStatus, Appointment.STATUS_BOOKED);
         if (appointmentMapper.selectCount(wrapper) > 0) {
             throw new BusinessException(409, "您已预约过该排班，请勿重复挂号");
         }
@@ -65,10 +67,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = new Appointment();
         appointment.setPatientId(request.getPatientId());
         appointment.setScheduleId(request.getScheduleId());
-        appointment.setStatus(1);
+        appointment.setStatus(Appointment.STATUS_BOOKED);
         appointmentMapper.insert(appointment);
 
-        // Decrement rest quota（定向更新，避开 docId String/INT 类型不匹配）
+        // Decrement rest quota
         scheduleMapper.updateRestQuota(schedule.getScheduleId(), schedule.getRestQuota() - 1);
 
         return buildVO(appointment);
@@ -81,15 +83,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appointment == null) {
             throw new BusinessException(404, "预约记录不存在");
         }
-        if (appointment.getStatus() != 1) {
+        if (appointment.getStatus() != Appointment.STATUS_BOOKED) {
             throw new BusinessException(409, "该预约无法取消（已取消或已就诊）");
         }
 
         // Update status to cancelled
-        appointment.setStatus(2);
+        appointment.setStatus(Appointment.STATUS_CANCELLED);
         appointmentMapper.updateById(appointment);
 
-        // Increment rest quota（定向更新，避开 docId String/INT 类型不匹配）
+        // Increment rest quota
         Schedule schedule = scheduleMapper.selectById(appointment.getScheduleId());
         if (schedule != null) {
             scheduleMapper.updateRestQuota(schedule.getScheduleId(), schedule.getRestQuota() + 1);
@@ -97,7 +99,24 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @Transactional
+    public void finishAppointment(Integer apptId) {
+        Appointment appointment = appointmentMapper.selectById(apptId);
+        if (appointment == null) {
+            throw new BusinessException(404, "预约记录不存在");
+        }
+        if (appointment.getStatus() != Appointment.STATUS_BOOKED) {
+            throw new BusinessException(409, "该预约无法完成就诊（非待就诊状态）");
+        }
+
+        appointment.setStatus(Appointment.STATUS_FINISHED);
+        appointmentMapper.updateById(appointment);
+    }
+
+    @Override
     public List<AppointmentVO> listByPatient(Integer patientId, Integer status) {
+        autoExpirePastAppointments();
+
         LambdaQueryWrapper<Appointment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Appointment::getPatientId, patientId);
         if (status != null) {
@@ -109,10 +128,50 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentVO> listBySchedule(Integer scheduleId) {
+        autoExpirePastAppointments();
+
         LambdaQueryWrapper<Appointment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Appointment::getScheduleId, scheduleId);
         wrapper.orderByAsc(Appointment::getCreateTime);
         return buildVOList(appointmentMapper.selectList(wrapper));
+    }
+
+    private void autoExpirePastAppointments() {
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        // Schedules strictly in the past
+        LambdaQueryWrapper<Schedule> pastWrapper = new LambdaQueryWrapper<>();
+        pastWrapper.lt(Schedule::getWorkDate, today);
+        List<Schedule> pastSchedules = scheduleMapper.selectList(pastWrapper);
+
+        // Schedules for today — check if the shift has ended
+        LambdaQueryWrapper<Schedule> todayWrapper = new LambdaQueryWrapper<>();
+        todayWrapper.eq(Schedule::getWorkDate, today);
+        List<Schedule> todaySchedules = scheduleMapper.selectList(todayWrapper);
+        for (Schedule s : todaySchedules) {
+            boolean shiftPassed = switch (s.getShift()) {
+                case "上午" -> now.isAfter(LocalTime.of(12, 0));
+                case "下午" -> now.isAfter(LocalTime.of(17, 0));
+                case "夜诊" -> now.isAfter(LocalTime.of(21, 0));
+                default -> false;
+            };
+            if (shiftPassed) pastSchedules.add(s);
+        }
+
+        if (pastSchedules.isEmpty()) return;
+
+        List<Integer> pastIds = pastSchedules.stream()
+                .map(Schedule::getScheduleId)
+                .collect(Collectors.toList());
+
+        LambdaQueryWrapper<Appointment> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(Appointment::getScheduleId, pastIds)
+               .eq(Appointment::getStatus, Appointment.STATUS_BOOKED);
+
+        Appointment updateEntity = new Appointment();
+        updateEntity.setStatus(Appointment.STATUS_EXPIRED);
+        appointmentMapper.update(updateEntity, wrapper);
     }
 
     private AppointmentVO buildVO(Appointment appointment) {

@@ -14,6 +14,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @TableName("appointment")
 public class Appointment {
+    public static final int STATUS_BOOKED = 1;
+    public static final int STATUS_CANCELLED = 2;
+    public static final int STATUS_FINISHED = 3;
+    public static final int STATUS_EXPIRED = 4;
+
     @TableId(type = IdType.AUTO)
     private Integer apptId;
     private Integer patientId;

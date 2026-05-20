@@ -24,8 +24,6 @@ const profile = reactive({
 })
 
 const profileRules = {
-  realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  gender:   [{ required: true, message: '请选择性别', trigger: 'change' }],
   phone: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
     {
@@ -55,8 +53,6 @@ async function saveProfile() {
   profileSaving.value = true
   try {
     const data = await updateMyProfile({
-      realName: profile.realName,
-      gender: profile.gender,
       phone: profile.phone
     })
     Object.assign(profile, data)
@@ -152,11 +148,11 @@ onMounted(loadProfile)
         </el-form-item>
 
         <div class="form-row">
-          <el-form-item label="真实姓名" prop="realName" class="col-grow">
-            <el-input v-model="profile.realName" maxlength="20" size="large" />
+          <el-form-item label="真实姓名" class="col-grow">
+            <el-input :model-value="profile.realName" disabled maxlength="20" size="large" />
           </el-form-item>
-          <el-form-item label="性别" prop="gender" class="col-fix">
-            <el-radio-group v-model="profile.gender" class="gender">
+          <el-form-item label="性别" class="col-fix">
+            <el-radio-group :model-value="profile.gender" disabled class="gender">
               <el-radio-button v-for="g in GENDER_OPTIONS" :key="g.value" :value="g.value">
                 {{ g.label }}
               </el-radio-button>

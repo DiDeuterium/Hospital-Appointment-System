@@ -21,6 +21,7 @@ const statusTabs = [
   { key: '',       label: '全部' },
   { key: String(APPT_STATUS.BOOKED),     label: '待就诊' },
   { key: String(APPT_STATUS.FINISHED),   label: '已完成' },
+  { key: String(APPT_STATUS.EXPIRED),    label: '已过期' },
   { key: String(APPT_STATUS.CANCELLED),  label: '已取消' }
 ]
 
@@ -43,6 +44,7 @@ const list = computed(() => {
 const tagTypeMap = {
   [APPT_STATUS.BOOKED]: 'primary',
   [APPT_STATUS.FINISHED]: 'success',
+  [APPT_STATUS.EXPIRED]: 'warning',
   [APPT_STATUS.CANCELLED]: 'default'
 }
 

@@ -88,8 +88,6 @@ public class PatientServiceImpl implements PatientService {
             throw new BusinessException(409, "该手机号已被使用");
         }
 
-        patient.setRealName(request.getRealName());
-        patient.setGender(request.getGender());
         patient.setPhone(request.getPhone());
         patientMapper.updateById(patient);
         return toVO(patient);

@@ -11,23 +11,26 @@ export const ROLE_LABEL = {
   [ROLE.ADMIN]: '管理员'
 }
 
-// 预约状态：1-已预约 2-已取消 3-已完成
+// 预约状态：1-已预约 2-已取消 3-已完成 4-已过期
 export const APPT_STATUS = Object.freeze({
   BOOKED: 1,
   CANCELLED: 2,
-  FINISHED: 3
+  FINISHED: 3,
+  EXPIRED: 4
 })
 
 export const APPT_STATUS_LABEL = {
   [APPT_STATUS.BOOKED]: '已预约',
   [APPT_STATUS.CANCELLED]: '已取消',
-  [APPT_STATUS.FINISHED]: '已完成'
+  [APPT_STATUS.FINISHED]: '已完成',
+  [APPT_STATUS.EXPIRED]: '已过期'
 }
 
 export const APPT_STATUS_TAG_TYPE = {
   [APPT_STATUS.BOOKED]: 'primary',
   [APPT_STATUS.CANCELLED]: 'info',
-  [APPT_STATUS.FINISHED]: 'success'
+  [APPT_STATUS.FINISHED]: 'success',
+  [APPT_STATUS.EXPIRED]: 'warning'
 }
 
 // 时段

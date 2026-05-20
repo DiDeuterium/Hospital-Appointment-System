@@ -30,6 +30,12 @@ public class AppointmentController {
         return Result.ok("取消成功", null);
     }
 
+    @PutMapping("/{apptId}/finish")
+    public Result<Void> finish(@PathVariable Integer apptId) {
+        appointmentService.finishAppointment(apptId);
+        return Result.ok("已完成就诊", null);
+    }
+
     @GetMapping("/patients/{patientId}")
     public Result<List<AppointmentVO>> listByPatient(
             @PathVariable Integer patientId,
