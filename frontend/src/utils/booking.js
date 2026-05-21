@@ -67,6 +67,13 @@ export const DEPT_CATEGORIES = [
   { key: 'other',    label: '其他',  test: (n) => !/内|外|骨|妇|产|儿|眼|耳|鼻|喉|口腔|牙/.test(n) }
 ]
 
+// 日期时间格式化：ISO 转为 YYYY-MM-DD HH:mm:ss
+export function formatDateTime(d) {
+  if (!d) return '—'
+  const s = String(d)
+  return s.replace('T', ' ').replace(/\.\d+$/, '').slice(0, 19)
+}
+
 // 日期工具：返回 YYYY-MM-DD
 export function formatDate(d) {
   const dt = d instanceof Date ? d : new Date(d)

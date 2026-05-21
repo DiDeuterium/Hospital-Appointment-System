@@ -7,7 +7,7 @@ import { GENDER_LABEL } from '@/utils/constants'
 defineProps({
   doctor: { type: Object, required: true }
 })
-defineEmits(['view-detail', 'view-schedules'])
+defineEmits(['view-detail'])
 </script>
 
 <template>
@@ -32,13 +32,9 @@ defineEmits(['view-detail', 'view-schedules'])
     </p>
 
     <footer class="doctor-card__footer">
-      <el-button @click="$emit('view-detail', doctor)">
+      <el-button type="primary" @click="$emit('view-detail', doctor)">
         <AppIcon name="user" :size="14" style="margin-right:4px" />
         医生详情
-      </el-button>
-      <el-button type="primary" @click="$emit('view-schedules', doctor)">
-        查看排班
-        <AppIcon name="arrow-right" :size="14" style="margin-left:4px" />
       </el-button>
     </footer>
   </article>

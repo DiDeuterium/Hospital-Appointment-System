@@ -5,6 +5,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { listPatientsBySchedule } from '@/api/doctor'
 import { finishAppointment, cancelAppointment } from '@/api/appointment'
 import { APPT_STATUS, APPT_STATUS_LABEL, APPT_STATUS_TAG_TYPE } from '@/utils/constants'
+import { formatDateTime } from '@/utils/booking'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -119,7 +120,7 @@ onMounted(load)
                 {{ APPT_STATUS_LABEL[p.status] || '未知' }}
               </StatusTag>
             </td>
-            <td class="pt-table__time">{{ p.createTime || '—' }}</td>
+            <td class="pt-table__time">{{ formatDateTime(p.createTime) }}</td>
             <td class="pt-table__actions">
               <template v-if="p.status === APPT_STATUS.BOOKED">
                 <el-button

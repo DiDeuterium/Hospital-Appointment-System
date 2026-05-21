@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { cancelAppointment } from '@/api/appointment'
 import { APPT_STATUS, APPT_STATUS_LABEL } from '@/utils/constants'
-import { SHIFT_TIME_MAP, deptIcon } from '@/utils/booking'
+import { SHIFT_TIME_MAP, deptIcon, formatDateTime } from '@/utils/booking'
 import { useUserStore } from '@/stores/user'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusTag from '@/components/StatusTag.vue'
@@ -91,7 +91,7 @@ const tips = [
           </div>
           <div class="info-grid__item">
             <div class="info-grid__label">挂号时间</div>
-            <div class="info-grid__value">{{ appt.createTime || '—' }}</div>
+            <div class="info-grid__value">{{ formatDateTime(appt.createTime) }}</div>
           </div>
           <div class="info-grid__item">
             <div class="info-grid__label">就诊人</div>
