@@ -31,7 +31,7 @@ async function load() {
 function viewDetail(doc) {
   router.push({ name: 'PatientDoctorDetail', params: { deptId, docId: doc.docId } })
 }
-function viewSchedules(doc) {
+function goSchedules() {
   router.push({ name: 'PatientSchedules', params: { deptId } })
 }
 
@@ -44,7 +44,11 @@ onMounted(load)
       :title="deptName"
       :subtitle="'共 ' + list.length + ' 位医生'"
       :breadcrumbs="[{ label: '首页', to: '/patient/home' }, { label: '选择科室', to: '/patient/departments' }, { label: deptName }]"
-    />
+    >
+      <template #extra>
+        <el-button type="primary" @click="goSchedules">查看本科室排班</el-button>
+      </template>
+    </PageHeader>
 
     <div v-loading="loading" class="doctors-grid">
       <el-row :gutter="16">
@@ -59,7 +63,6 @@ onMounted(load)
           <DoctorCard
             :doctor="d"
             @view-detail="viewDetail"
-            @view-schedules="viewSchedules"
           />
         </el-col>
       </el-row>

@@ -1,5 +1,6 @@
 package com.hospital.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -17,5 +18,7 @@ public class AppointmentVO {
     private LocalDate workDate;
     private String shift;
     private Integer status;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 }

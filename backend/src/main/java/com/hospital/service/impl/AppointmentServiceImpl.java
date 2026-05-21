@@ -54,6 +54,24 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new BusinessException(409, "该排班号源已约满");
         }
 
+        // Check if schedule date has passed
+        LocalDate today = LocalDate.now();
+        if (schedule.getWorkDate().isBefore(today)) {
+            throw new BusinessException(409, "该排班日期已过，无法预约");
+        }
+        if (schedule.getWorkDate().equals(today)) {
+            LocalTime now = LocalTime.now();
+            boolean shiftPassed = switch (schedule.getShift()) {
+                case "上午" -> now.isAfter(LocalTime.of(12, 0));
+                case "下午" -> now.isAfter(LocalTime.of(17, 0));
+                case "夜诊" -> now.isAfter(LocalTime.of(21, 0));
+                default -> false;
+            };
+            if (shiftPassed) {
+                throw new BusinessException(409, "该时段已过，无法预约");
+            }
+        }
+
         // Check duplicate appointment
         LambdaQueryWrapper<Appointment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Appointment::getPatientId, request.getPatientId())

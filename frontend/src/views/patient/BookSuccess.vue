@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { peekResult, SHIFT_TIME_MAP, clearBooking } from '@/utils/booking'
+import { peekResult, SHIFT_TIME_MAP, clearBooking, formatDateTime } from '@/utils/booking'
 import StatusTag from '@/components/StatusTag.vue'
 import StepFlow from '@/components/StepFlow.vue'
 import SectionCard from '@/components/SectionCard.vue'
@@ -59,7 +59,7 @@ function goAppts() { clearBooking(); router.push({ name: 'PatientAppointments' }
           </div>
           <div class="info-table__row" v-if="result?.createTime">
             <span class="info-table__label">挂号时间</span>
-            <span class="info-table__value">{{ result.createTime }}</span>
+            <span class="info-table__value">{{ formatDateTime(result.createTime) }}</span>
           </div>
         </div>
       </SectionCard>
