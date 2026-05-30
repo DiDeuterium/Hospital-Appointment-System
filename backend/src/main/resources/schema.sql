@@ -21,7 +21,8 @@ CREATE TABLE department (
     dept_name   VARCHAR(50)  NOT NULL UNIQUE            COMMENT '科室名称',
     location    VARCHAR(100)                            COMMENT '门诊位置',
     description TEXT                                    COMMENT '科室简介',
-    status      TINYINT      NOT NULL DEFAULT 1         COMMENT '状态: 1正常 0停用'
+    status      TINYINT      NOT NULL DEFAULT 1         COMMENT '状态: 1正常 0停用',
+    CHECK (status IN (0, 1))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='科室信息表';
 
 -- 2. 医生表
@@ -35,6 +36,7 @@ CREATE TABLE doctor (
     avatar_url  VARCHAR(255)                                       COMMENT '医生头像URL',
     specialty   VARCHAR(500)                                       COMMENT '擅长领域',
     status      TINYINT      NOT NULL DEFAULT 1                    COMMENT '状态: 1正常 0停用',
+    CHECK (status IN (0, 1)),
     FOREIGN KEY (dept_id) REFERENCES department(dept_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='医生信息表';
 
@@ -55,7 +57,8 @@ CREATE TABLE admin_user (
     real_name   VARCHAR(50)  NOT NULL                   COMMENT '管理员姓名',
     password    VARCHAR(255) NOT NULL                   COMMENT '登录密码(BCrypt哈希)',
     status      TINYINT      NOT NULL DEFAULT 1         COMMENT '状态: 1正常 0停用',
-    create_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+    create_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    CHECK (status IN (0, 1))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管理员用户表';
 
 -- ================== 2. 排班与预约模块 ==================
@@ -71,6 +74,8 @@ CREATE TABLE schedule (
     fee         DECIMAL(8, 2) NOT NULL DEFAULT 0.00                      COMMENT '挂号费',
     status      TINYINT       NOT NULL DEFAULT 1                         COMMENT '出诊状态: 1正常 0停诊',
     UNIQUE (doc_id, work_date, shift),
+    CHECK (fee >= 0),
+    CHECK (status IN (0, 1)),
     CHECK (rest_quota >= 0 AND rest_quota <= total_quota),
     FOREIGN KEY (doc_id) REFERENCES doctor(doc_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='医生排班表';
@@ -86,6 +91,7 @@ CREATE TABLE appointment (
     create_time   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     UNIQUE (schedule_id, queue_number),
+    CHECK (queue_number > 0),
     CHECK (status IN (1, 2, 3, 4)),
     FOREIGN KEY (patient_id)  REFERENCES patient(patient_id)   ON DELETE RESTRICT,
     FOREIGN KEY (schedule_id) REFERENCES schedule(schedule_id) ON DELETE RESTRICT
@@ -100,6 +106,7 @@ CREATE TABLE payment_record (
     pay_method  VARCHAR(20)   NOT NULL DEFAULT '模拟支付' COMMENT '支付方式',
     pay_time    DATETIME                                 COMMENT '支付时间',
     create_time DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    CHECK (amount >= 0),
     CHECK (pay_status IN (0, 1, 2)),
     FOREIGN KEY (appt_id) REFERENCES appointment(appt_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='挂号费模拟支付记录表';
@@ -121,6 +128,8 @@ CREATE TABLE schedule_change_request (
     audit_time         DATETIME                                COMMENT '审核时间',
     audit_remark       VARCHAR(255)                            COMMENT '审核意见',
     CHECK (change_type IN (1, 2)),
+    CHECK (target_shift IS NULL OR target_shift IN ('上午', '下午', '夜诊')),
+    CHECK (target_total_quota IS NULL OR target_total_quota > 0),
     CHECK (status IN (1, 2, 3, 4)),
     FOREIGN KEY (schedule_id) REFERENCES schedule(schedule_id) ON DELETE RESTRICT,
     FOREIGN KEY (audit_admin_id) REFERENCES admin_user(admin_id) ON DELETE SET NULL
