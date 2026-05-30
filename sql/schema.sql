@@ -164,3 +164,63 @@ CREATE INDEX idx_appt_status           ON appointment(status);
 CREATE INDEX idx_payment_status        ON payment_record(pay_status, create_time);
 CREATE INDEX idx_change_request_status ON schedule_change_request(status, apply_time);
 CREATE INDEX idx_notice_status         ON sys_notice(status, is_top, publish_time);
+
+-- ================== 查询视图 ==================
+
+-- 预约详情视图：用于患者端、医生端、管理员端查询预约详情。
+CREATE VIEW v_appointment_detail AS
+SELECT
+    a.appt_id,
+    a.patient_id,
+    p.real_name AS patient_name,
+    p.gender AS patient_gender,
+    p.phone AS patient_phone,
+    a.schedule_id,
+    a.queue_number,
+    a.status AS appointment_status,
+    a.cancel_reason,
+    a.create_time,
+    a.update_time,
+    s.work_date,
+    s.shift,
+    s.fee,
+    d.doc_id,
+    d.doc_name,
+    d.title,
+    dept.dept_id,
+    dept.dept_name,
+    pr.payment_id,
+    pr.amount,
+    pr.pay_status,
+    pr.pay_method,
+    pr.pay_time
+FROM appointment a
+JOIN patient p ON p.patient_id = a.patient_id
+JOIN schedule s ON s.schedule_id = a.schedule_id
+JOIN doctor d ON d.doc_id = s.doc_id
+JOIN department dept ON dept.dept_id = d.dept_id
+LEFT JOIN payment_record pr ON pr.appt_id = a.appt_id;
+
+-- 可预约排班视图：用于患者端查询可预约号源。
+CREATE VIEW v_available_schedule AS
+SELECT
+    s.schedule_id,
+    s.doc_id,
+    d.doc_name,
+    d.title,
+    d.avatar_url,
+    d.specialty,
+    dept.dept_id,
+    dept.dept_name,
+    s.work_date,
+    s.shift,
+    s.total_quota,
+    s.rest_quota,
+    s.fee
+FROM schedule s
+JOIN doctor d ON d.doc_id = s.doc_id
+JOIN department dept ON dept.dept_id = d.dept_id
+WHERE s.status = 1
+  AND d.status = 1
+  AND dept.status = 1
+  AND s.rest_quota > 0;
