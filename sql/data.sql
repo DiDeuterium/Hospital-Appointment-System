@@ -19,19 +19,19 @@ INSERT INTO department (dept_name, location, description, status) VALUES
 -- 2. 医生数据
 -- avatar_url 仅保存图片访问路径，图片文件可放在后端静态资源或上传目录中。
 INSERT INTO doctor (doc_name, gender, title, dept_id, password, avatar_url, specialty, status) VALUES
-('张伟',   'M', '主任医师',   1, '$2b$10$OxDoBhKyhGJ/sPWLBK3QOuVg1g0Cm7UIYPAG0LlsN5BAFgqEZdhOi', '/avatars/doctor-1.jpg',  '冠心病、高血压、心律失常综合诊疗', 1),
-('李娜',   'F', '副主任医师', 1, '$2b$10$Y6eNyHtHCKy0stV..jLr9.Eq4C9mZsvLnEMu29WBPNCuOubYx4l9O', '/avatars/doctor-2.jpg',  '心力衰竭、心血管慢病管理', 1),
-('王强',   'M', '主任医师',   2, '$2b$10$YKBK.65uhGul38tG5RLU/u61nSO9PjmBcc1m12Tfe5bxkBPOt4Du6', '/avatars/doctor-3.jpg',  '脑血管病、头痛、癫痫诊疗', 1),
-('刘芳',   'F', '主治医师',   2, '$2b$10$.Hoon5Ehe4uAPZlDqMp.AuZ7DZQi4KzGkuL0E0ps1T4Y.z0ohkNzm', '/avatars/doctor-4.jpg',  '帕金森、睡眠障碍、神经康复', 1),
-('陈刚',   'M', '主任医师',   3, '$2b$10$PFMDur4veCaeqMm6L9GWbe/7e54cuJO8p55bJGnFd3VWFLsc0vOpS', '/avatars/doctor-5.jpg',  '骨折、关节置换、脊柱疾病', 1),
-('杨丽',   'F', '副主任医师', 3, '$2b$10$veDC4Kie5RrwMv8MrHcZTugQkU37/KvAX/1.QbAHVUHY1ex4L.YJC', '/avatars/doctor-6.jpg',  '颈肩腰腿痛、运动损伤', 1),
-('赵敏',   'F', '主任医师',   4, '$2b$10$lsoP1laicZoNRdlvy6YZgulUXTbQAfFtaxXKNRXGFBM.Zvd9Qn6nm', '/avatars/doctor-7.jpg',  '儿童呼吸道感染、儿童保健', 1),
-('孙磊',   'M', '主治医师',   5, '$2b$10$QZugyY6te.J8pVf0/e7Rz.5PA1rV2qgQIhQ3savvEPtt9volQlw26', '/avatars/doctor-8.jpg',  '湿疹、痤疮、皮肤过敏', 1),
-('周杰',   'M', '主任医师',   6, '$2b$10$Z0.XBRZYz2qSfmu.Tc/BJeVEJOcs.TJA7Tm/j.WkYPa7huYEjMJ/q', '/avatars/doctor-9.jpg',  '白内障、青光眼、眼底病', 1),
-('吴秀英', 'F', '副主任医师', 7, '$2b$10$4OWUyDWQR3JA1KK6jFGoXuIX9SWZnzywF3RBUI6h.cTYF9F80CP.G', '/avatars/doctor-10.jpg', '鼻炎、咽喉炎、听力疾病', 1),
-('郑涛',   'M', '主治医师',   8, '$2b$10$G41IP6nA2NS8OG0MMzbpa.7ncsnaZn/9bjuL5Y8phBgBf8Oc23SL6', '/avatars/doctor-11.jpg', '胃炎、肠炎、消化道溃疡', 1),
-('钱红',   'F', '主任医师',   9, '$2b$10$OGCCox9Izs6eSqTBjq64N.xd07w7HFn8io4yp6z.K5zhuF9Hc/jV6', '/avatars/doctor-12.jpg', '哮喘、肺炎、慢阻肺', 1),
-('刘梅',   'F', '主任医师',  10, '$2b$10$OxDoBhKyhGJ/sPWLBK3QOuVg1g0Cm7UIYPAG0LlsN5BAFgqEZdhOi', '/avatars/doctor-13.jpg', '妇科炎症、月经异常、围产咨询', 1);
+('张伟',   'M', '主任医师',   1, '$2b$10$OxDoBhKyhGJ/sPWLBK3QOuVg1g0Cm7UIYPAG0LlsN5BAFgqEZdhOi', '/avatars/doctor-1.png',  '冠心病、高血压、心律失常综合诊疗', 1),
+('李娜',   'F', '副主任医师', 1, '$2b$10$Y6eNyHtHCKy0stV..jLr9.Eq4C9mZsvLnEMu29WBPNCuOubYx4l9O', '/avatars/doctor-2.png',  '心力衰竭、心血管慢病管理', 1),
+('王强',   'M', '主任医师',   2, '$2b$10$YKBK.65uhGul38tG5RLU/u61nSO9PjmBcc1m12Tfe5bxkBPOt4Du6', '/avatars/doctor-3.png',  '脑血管病、头痛、癫痫诊疗', 1),
+('刘芳',   'F', '主治医师',   2, '$2b$10$.Hoon5Ehe4uAPZlDqMp.AuZ7DZQi4KzGkuL0E0ps1T4Y.z0ohkNzm', '/avatars/doctor-4.png',  '帕金森、睡眠障碍、神经康复', 1),
+('陈刚',   'M', '主任医师',   3, '$2b$10$PFMDur4veCaeqMm6L9GWbe/7e54cuJO8p55bJGnFd3VWFLsc0vOpS', '/avatars/doctor-5.png',  '骨折、关节置换、脊柱疾病', 1),
+('杨丽',   'F', '副主任医师', 3, '$2b$10$veDC4Kie5RrwMv8MrHcZTugQkU37/KvAX/1.QbAHVUHY1ex4L.YJC', '/avatars/doctor-6.png',  '颈肩腰腿痛、运动损伤', 1),
+('赵敏',   'F', '主任医师',   4, '$2b$10$lsoP1laicZoNRdlvy6YZgulUXTbQAfFtaxXKNRXGFBM.Zvd9Qn6nm', '/avatars/doctor-7.png',  '儿童呼吸道感染、儿童保健', 1),
+('孙磊',   'M', '主治医师',   5, '$2b$10$QZugyY6te.J8pVf0/e7Rz.5PA1rV2qgQIhQ3savvEPtt9volQlw26', '/avatars/doctor-8.png',  '湿疹、痤疮、皮肤过敏', 1),
+('周杰',   'M', '主任医师',   6, '$2b$10$Z0.XBRZYz2qSfmu.Tc/BJeVEJOcs.TJA7Tm/j.WkYPa7huYEjMJ/q', '/avatars/doctor-9.png',  '白内障、青光眼、眼底病', 1),
+('吴秀英', 'F', '副主任医师', 7, '$2b$10$4OWUyDWQR3JA1KK6jFGoXuIX9SWZnzywF3RBUI6h.cTYF9F80CP.G', '/avatars/doctor-10.png', '鼻炎、咽喉炎、听力疾病', 1),
+('郑涛',   'M', '主治医师',   8, '$2b$10$G41IP6nA2NS8OG0MMzbpa.7ncsnaZn/9bjuL5Y8phBgBf8Oc23SL6', '/avatars/doctor-11.png', '胃炎、肠炎、消化道溃疡', 1),
+('钱红',   'F', '主任医师',   9, '$2b$10$OGCCox9Izs6eSqTBjq64N.xd07w7HFn8io4yp6z.K5zhuF9Hc/jV6', '/avatars/doctor-12.png', '哮喘、肺炎、慢阻肺', 1),
+('刘梅',   'F', '主任医师',  10, '$2b$10$OxDoBhKyhGJ/sPWLBK3QOuVg1g0Cm7UIYPAG0LlsN5BAFgqEZdhOi', '/avatars/doctor-13.png', '妇科炎症、月经异常、围产咨询', 1);
 
 -- 3. 患者数据
 INSERT INTO patient (id_card, real_name, gender, phone, password) VALUES
