@@ -22,7 +22,5 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
 
-# Admin account (hardcoded for simplicity)
-admin:
-  username: admin
-  password: admin123
+# Admin login now uses admin_user table with BCrypt.
+# Default accounts: admin1/admin123, admin2/admin123

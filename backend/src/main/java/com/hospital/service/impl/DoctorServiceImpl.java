@@ -26,22 +26,36 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public LoginResponse login(String docId, String password) {
+    public LoginResponse login(Integer docId, String password) {
         Doctor doctor = doctorMapper.selectById(docId);
         if (doctor == null) {
             throw new BusinessException(401, "工号或密码错误");
         }
+        if (doctor.getStatus() != null && doctor.getStatus() == 0) {
+            throw new BusinessException(403, "账号已停用，请联系管理员");
+        }
         if (!encoder.matches(password, doctor.getPassword())) {
             throw new BusinessException(401, "工号或密码错误");
         }
-        String token = loginService.createToken("DOCTOR", doctor.getDocId(), doctor.getDocName());
-        return new LoginResponse(token, doctor.getDocId(), doctor.getDocName());
+        String token = loginService.createToken("DOCTOR", String.valueOf(doctor.getDocId()), doctor.getDocName());
+        return new LoginResponse(token, String.valueOf(doctor.getDocId()), doctor.getDocName());
     }
 
     @Override
-    public List<Doctor> list(String deptId) {
+    public List<Doctor> list(Integer deptId) {
         LambdaQueryWrapper<Doctor> wrapper = new LambdaQueryWrapper<>();
-        if (deptId != null && !deptId.isBlank()) {
+        if (deptId != null) {
+            wrapper.eq(Doctor::getDeptId, deptId);
+        }
+        wrapper.eq(Doctor::getStatus, 1);
+        wrapper.orderByAsc(Doctor::getDocId);
+        return doctorMapper.selectList(wrapper);
+    }
+
+    @Override
+    public List<Doctor> listAll(Integer deptId) {
+        LambdaQueryWrapper<Doctor> wrapper = new LambdaQueryWrapper<>();
+        if (deptId != null) {
             wrapper.eq(Doctor::getDeptId, deptId);
         }
         wrapper.orderByAsc(Doctor::getDocId);
@@ -49,7 +63,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public Doctor getById(String docId) {
+    public Doctor getById(Integer docId) {
         Doctor doctor = doctorMapper.selectById(docId);
         if (doctor == null) {
             throw new BusinessException(404, "医生不存在");
@@ -62,22 +76,20 @@ public class DoctorServiceImpl implements DoctorService {
         if (request.getPassword() == null || request.getPassword().isBlank()) {
             throw new BusinessException(400, "密码不能为空");
         }
-        Doctor exist = doctorMapper.selectById(request.getDocId());
-        if (exist != null) {
-            throw new BusinessException(409, "医生工号已存在");
-        }
         Doctor doctor = new Doctor();
-        doctor.setDocId(request.getDocId());
         doctor.setDocName(request.getDocName());
         doctor.setGender(request.getGender());
         doctor.setTitle(request.getTitle());
         doctor.setDeptId(request.getDeptId());
         doctor.setPassword(encoder.encode(request.getPassword()));
+        doctor.setAvatarUrl(request.getAvatarUrl());
+        doctor.setSpecialty(request.getSpecialty());
+        doctor.setStatus(1);
         doctorMapper.insert(doctor);
     }
 
     @Override
-    public void update(String docId, DoctorRequest request) {
+    public void update(Integer docId, DoctorRequest request) {
         Doctor doctor = doctorMapper.selectById(docId);
         if (doctor == null) {
             throw new BusinessException(404, "医生不存在");
@@ -86,6 +98,8 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.setGender(request.getGender());
         doctor.setTitle(request.getTitle());
         doctor.setDeptId(request.getDeptId());
+        doctor.setAvatarUrl(request.getAvatarUrl());
+        doctor.setSpecialty(request.getSpecialty());
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             doctor.setPassword(encoder.encode(request.getPassword()));
         }
@@ -93,7 +107,17 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public void delete(String docId) {
+    public void updateStatus(Integer docId, Integer status) {
+        Doctor doctor = doctorMapper.selectById(docId);
+        if (doctor == null) {
+            throw new BusinessException(404, "医生不存在");
+        }
+        doctor.setStatus(status);
+        doctorMapper.updateById(doctor);
+    }
+
+    @Override
+    public void delete(Integer docId) {
         Doctor doctor = doctorMapper.selectById(docId);
         if (doctor == null) {
             throw new BusinessException(404, "医生不存在");

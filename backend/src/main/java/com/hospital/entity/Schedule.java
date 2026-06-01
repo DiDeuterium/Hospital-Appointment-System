@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -16,9 +17,11 @@ import java.time.LocalDate;
 public class Schedule {
     @TableId(type = IdType.AUTO)
     private Integer scheduleId;
-    private String docId;
+    private Integer docId;
     private LocalDate workDate;
     private String shift;
     private Integer totalQuota;
     private Integer restQuota;
+    private BigDecimal fee;
+    private Integer status;
 }

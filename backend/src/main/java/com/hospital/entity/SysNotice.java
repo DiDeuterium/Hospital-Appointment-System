@@ -7,15 +7,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("department")
-public class Department {
+@TableName("sys_notice")
+public class SysNotice {
     @TableId(type = IdType.AUTO)
-    private Integer deptId;
-    private String deptName;
-    private String location;
-    private String description;
+    private Integer noticeId;
+    private String title;
+    private String content;
+    private Integer isTop;
     private Integer status;
+    private LocalDateTime publishTime;
+    private Integer adminId;
 }

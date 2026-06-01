@@ -1,14 +1,12 @@
 package com.hospital.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
 public class DoctorRequest {
-    @NotBlank(message = "医生工号不能为空")
-    private String docId;
-
     @NotBlank(message = "姓名不能为空")
     private String docName;
 
@@ -17,9 +15,10 @@ public class DoctorRequest {
 
     private String title;
 
-    @NotBlank(message = "所属科室不能为空")
-    private String deptId;
+    @NotNull(message = "所属科室不能为空")
+    private Integer deptId;
 
-    // 新增时必填，修改时为空表示保留原密码（具体校验在 DoctorServiceImpl.add 中）
     private String password;
+    private String avatarUrl;
+    private String specialty;
 }

@@ -25,12 +25,23 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (keyword != null && !keyword.isBlank()) {
             wrapper.like(Department::getDeptName, keyword);
         }
+        wrapper.eq(Department::getStatus, 1);
         wrapper.orderByAsc(Department::getDeptId);
         return departmentMapper.selectList(wrapper);
     }
 
     @Override
-    public Department getById(String deptId) {
+    public List<Department> listAll(String keyword) {
+        LambdaQueryWrapper<Department> wrapper = new LambdaQueryWrapper<>();
+        if (keyword != null && !keyword.isBlank()) {
+            wrapper.like(Department::getDeptName, keyword);
+        }
+        wrapper.orderByAsc(Department::getDeptId);
+        return departmentMapper.selectList(wrapper);
+    }
+
+    @Override
+    public Department getById(Integer deptId) {
         Department dept = departmentMapper.selectById(deptId);
         if (dept == null) {
             throw new BusinessException(404, "科室不存在");
@@ -40,20 +51,16 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public void add(DepartmentRequest request) {
-        Department exist = departmentMapper.selectById(request.getDeptId());
-        if (exist != null) {
-            throw new BusinessException(409, "科室编号已存在");
-        }
         Department dept = new Department();
-        dept.setDeptId(request.getDeptId());
         dept.setDeptName(request.getDeptName());
         dept.setLocation(request.getLocation());
         dept.setDescription(request.getDescription());
+        dept.setStatus(1);
         departmentMapper.insert(dept);
     }
 
     @Override
-    public void update(String deptId, DepartmentRequest request) {
+    public void update(Integer deptId, DepartmentRequest request) {
         Department dept = departmentMapper.selectById(deptId);
         if (dept == null) {
             throw new BusinessException(404, "科室不存在");
@@ -65,7 +72,17 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public void delete(String deptId) {
+    public void updateStatus(Integer deptId, Integer status) {
+        Department dept = departmentMapper.selectById(deptId);
+        if (dept == null) {
+            throw new BusinessException(404, "科室不存在");
+        }
+        dept.setStatus(status);
+        departmentMapper.updateById(dept);
+    }
+
+    @Override
+    public void delete(Integer deptId) {
         Department dept = departmentMapper.selectById(deptId);
         if (dept == null) {
             throw new BusinessException(404, "科室不存在");

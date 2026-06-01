@@ -21,12 +21,8 @@ public interface ScheduleMapper extends BaseMapper<Schedule> {
           AND s.work_date >= CURDATE()
         ORDER BY s.work_date, s.shift
         """)
-    List<Schedule> selectSchedulesWithDetails(@Param("deptId") String deptId);
+    List<Schedule> selectSchedulesWithDetails(@Param("deptId") Integer deptId);
 
-    /**
-     * 定向更新剩余号源，避免 updateById 全字段 UPDATE 时
-     * docId(String) vs doc_id(INT) 类型不匹配导致参数错位
-     */
     @Update("UPDATE schedule SET rest_quota = #{restQuota} WHERE schedule_id = #{scheduleId}")
     int updateRestQuota(@Param("scheduleId") Integer scheduleId, @Param("restQuota") Integer restQuota);
 }

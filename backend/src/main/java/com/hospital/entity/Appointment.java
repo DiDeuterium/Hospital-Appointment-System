@@ -23,6 +23,9 @@ public class Appointment {
     private Integer apptId;
     private Integer patientId;
     private Integer scheduleId;
+    private Integer queueNumber;
     private Integer status;
+    private String cancelReason;
     private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }

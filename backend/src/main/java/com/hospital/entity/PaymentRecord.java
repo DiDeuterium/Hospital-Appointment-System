@@ -7,15 +7,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("department")
-public class Department {
+@TableName("payment_record")
+public class PaymentRecord {
     @TableId(type = IdType.AUTO)
-    private Integer deptId;
-    private String deptName;
-    private String location;
-    private String description;
-    private Integer status;
+    private Integer paymentId;
+    private Integer apptId;
+    private BigDecimal amount;
+    private Integer payStatus;
+    private String payMethod;
+    private LocalDateTime payTime;
+    private LocalDateTime createTime;
 }
