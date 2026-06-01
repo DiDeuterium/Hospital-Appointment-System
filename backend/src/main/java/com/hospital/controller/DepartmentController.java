@@ -27,12 +27,12 @@ public class DepartmentController {
     }
 
     @GetMapping("/{deptId}")
-    public Result<Department> getById(@PathVariable String deptId) {
+    public Result<Department> getById(@PathVariable Integer deptId) {
         return Result.ok(departmentService.getById(deptId));
     }
 
     @GetMapping("/{deptId}/doctors")
-    public Result<List<Doctor>> getDoctors(@PathVariable String deptId) {
+    public Result<List<Doctor>> getDoctors(@PathVariable Integer deptId) {
         return Result.ok(doctorService.list(deptId));
     }
 }

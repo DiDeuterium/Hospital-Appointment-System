@@ -5,9 +5,6 @@ import lombok.Data;
 
 @Data
 public class DepartmentRequest {
-    @NotBlank(message = "科室编号不能为空")
-    private String deptId;
-
     @NotBlank(message = "科室名称不能为空")
     private String deptName;
 

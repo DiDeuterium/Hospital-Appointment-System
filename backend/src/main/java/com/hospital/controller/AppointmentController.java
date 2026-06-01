@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -25,8 +26,13 @@ public class AppointmentController {
     }
 
     @PutMapping("/{apptId}/cancel")
-    public Result<Void> cancel(@PathVariable Integer apptId) {
-        appointmentService.cancelAppointment(apptId);
+    public Result<Void> cancel(@PathVariable Integer apptId,
+                               @RequestBody(required = false) Map<String, String> body) {
+        String cancelReason = null;
+        if (body != null && body.containsKey("cancelReason")) {
+            cancelReason = body.get("cancelReason");
+        }
+        appointmentService.cancelAppointment(apptId, cancelReason);
         return Result.ok("取消成功", null);
     }
 
@@ -36,6 +42,12 @@ public class AppointmentController {
         return Result.ok("已完成就诊", null);
     }
 
+    @PostMapping("/{apptId}/pay")
+    public Result<Void> pay(@PathVariable Integer apptId) {
+        appointmentService.payAppointment(apptId);
+        return Result.ok("支付成功", null);
+    }
+
     @GetMapping("/patients/{patientId}")
     public Result<List<AppointmentVO>> listByPatient(
             @PathVariable Integer patientId,
@@ -43,4 +55,3 @@ public class AppointmentController {
         return Result.ok(appointmentService.listByPatient(patientId, status));
     }
 }
-    

@@ -20,9 +20,9 @@ public class ScheduleController {
 
     @GetMapping
     public Result<List<ScheduleVO>> list(
-            @RequestParam String deptId,
+            @RequestParam Integer deptId,
             @RequestParam(required = false) LocalDate workDate,
             @RequestParam(required = false) String shift) {
-        return Result.ok(scheduleService.list(deptId, null, workDate, shift));
+        return Result.ok(scheduleService.listAvailable(deptId, workDate, shift));
     }
 }

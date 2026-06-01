@@ -24,7 +24,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/doctors/login",
                         "/api/admin/login",
                         "/api/departments/**",
-                        "/api/schedules/**"
+                        "/api/schedules/**",
+                        "/api/notices/**"
                 );
     }
 }

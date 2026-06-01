@@ -7,8 +7,10 @@ import java.util.List;
 
 public interface DepartmentService {
     List<Department> list(String keyword);
-    Department getById(String deptId);
+    List<Department> listAll(String keyword);
+    Department getById(Integer deptId);
     void add(DepartmentRequest request);
-    void update(String deptId, DepartmentRequest request);
-    void delete(String deptId);
+    void update(Integer deptId, DepartmentRequest request);
+    void updateStatus(Integer deptId, Integer status);
+    void delete(Integer deptId);
 }
