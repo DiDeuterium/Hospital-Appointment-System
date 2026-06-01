@@ -204,6 +204,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             vo.setTotalQuota(s.getTotalQuota());
             vo.setRestQuota(s.getRestQuota());
             vo.setFee(s.getFee());
+            vo.setStatus(s.getStatus());
 
             Doctor doc = doctorMap.get(s.getDocId());
             if (doc != null) {

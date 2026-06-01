@@ -73,12 +73,12 @@ const router = createRouter({
 const BYPASS_AUTH = false
 const DEMO_CREDENTIALS = {
   patient: { login: patientLogin, payload: { idCard: '110101199001011234', password: '123456' } },
-  doctor:  { login: doctorLogin,  payload: { docId: 'DOC001', password: '123456' } },
+  doctor:  { login: doctorLogin,  payload: { docId: 1, password: '123456' } },
   admin:   { login: adminLogin,   payload: { username: 'admin', password: 'admin123' } }
 }
 const MOCK_PROFILES = {
   patient: { patientId: 1, realName: '测试患者' },
-  doctor:  { docId: 'DOC001', docName: '测试医生' },
+  doctor:  { docId: 1, docName: '测试医生' },
   admin:   { username: 'dev-admin' }
 }
 

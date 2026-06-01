@@ -1,8 +1,12 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { listDepartments, createDepartment, updateDepartment, deleteDepartment } from '@/api/department'
+import {
+  listAdminDepartments, createDepartment, updateDepartment,
+  deleteDepartment, toggleDepartmentStatus
+} from '@/api/department'
 import PageHeader from '@/components/PageHeader.vue'
+import StatusTag from '@/components/StatusTag.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 const list = ref([])
@@ -16,13 +20,14 @@ const dialog = reactive({
 })
 const formRef = ref()
 const rules = {
-  deptId: [{ required: true, message: '请输入科室编号', trigger: 'blur' }],
   deptName: [{ required: true, message: '请输入科室名称', trigger: 'blur' }]
 }
 
 async function load() {
   loading.value = true
-  try { list.value = await listDepartments(keyword.value ? { keyword: keyword.value } : {}) } catch {} finally { loading.value = false }
+  try {
+    list.value = await listAdminDepartments(keyword.value ? { keyword: keyword.value } : {})
+  } catch {} finally { loading.value = false }
 }
 
 function openCreate() {
@@ -56,6 +61,20 @@ async function remove(row) {
     ElMessage.success('已删除')
     load()
   } catch {}
+}
+
+async function toggleStatus(row) {
+  const next = row.status === 1 ? 0 : 1
+  try {
+    if (next === 0) {
+      await ElMessageBox.confirm('停用后该科室将不再展示给患者，但历史数据保留。确认停用？', '提示', { type: 'warning', lockScroll: false })
+    }
+    await toggleDepartmentStatus(row.deptId, next)
+    ElMessage.success(next === 1 ? '已启用' : '已停用')
+    load()
+  } catch (e) {
+    if (e !== 'cancel' && e?.message) ElMessage.error(e.message)
+  }
 }
 
 const now = ref(new Date())
@@ -96,7 +115,7 @@ onBeforeUnmount(() => {
     <div v-loading="loading" class="table-wrap">
       <table class="dt-table" v-if="list.length">
         <thead>
-          <tr><th>编号</th><th>名称</th><th>位置</th><th>简介</th><th>操作</th></tr>
+          <tr><th>编号</th><th>名称</th><th>位置</th><th>简介</th><th>状态</th><th>操作</th></tr>
         </thead>
         <tbody>
           <tr v-for="d in list" :key="d.deptId">
@@ -104,8 +123,16 @@ onBeforeUnmount(() => {
             <td class="dt-table__name">{{ d.deptName }}</td>
             <td>{{ d.location || '—' }}</td>
             <td class="dt-table__desc">{{ (d.description || '').slice(0, 40) || '—' }}</td>
+            <td>
+              <StatusTag :type="d.status === 0 ? 'danger' : 'success'" size="small">
+                {{ d.status === 0 ? '停用' : '正常' }}
+              </StatusTag>
+            </td>
             <td class="dt-table__actions">
               <el-button size="small" @click="openEdit(d)">编辑</el-button>
+              <el-button size="small" :type="d.status === 1 ? 'warning' : 'success'" plain @click="toggleStatus(d)">
+                {{ d.status === 1 ? '停用' : '启用' }}
+              </el-button>
               <el-button size="small" type="danger" plain @click="remove(d)">删除</el-button>
             </td>
           </tr>
@@ -117,8 +144,8 @@ onBeforeUnmount(() => {
     <!-- 弹窗 -->
     <el-dialog v-model="dialog.visible" :title="dialog.isEdit ? '修改科室' : '新增科室'" width="480px" :lock-scroll="false">
       <el-form ref="formRef" :model="dialog.form" :rules="rules" label-position="top">
-        <el-form-item label="科室编号" prop="deptId">
-          <el-input v-model="dialog.form.deptId" :disabled="dialog.isEdit" size="large" />
+        <el-form-item v-if="dialog.isEdit" label="科室编号">
+          <el-input v-model="dialog.form.deptId" disabled size="large" />
         </el-form-item>
         <el-form-item label="科室名称" prop="deptName">
           <el-input v-model="dialog.form.deptName" size="large" />

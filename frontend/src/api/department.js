@@ -11,6 +11,9 @@ export function listDoctorsByDept(deptId) {
 }
 
 // 管理员 CRUD
+export function listAdminDepartments(params) {
+  return request.get('/admin/departments', { params })
+}
 export function createDepartment(data) {
   return request.post('/admin/departments', data)
 }
@@ -19,4 +22,9 @@ export function updateDepartment(deptId, data) {
 }
 export function deleteDepartment(deptId) {
   return request.delete(`/admin/departments/${deptId}`)
+}
+
+// 管理员：启用/停用科室（status: 1 正常 0 停用）
+export function toggleDepartmentStatus(deptId, status) {
+  return request.put(`/admin/departments/${deptId}/status`, { status })
 }

@@ -2,9 +2,12 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { cancelAppointment } from '@/api/appointment'
-import { APPT_STATUS, APPT_STATUS_LABEL } from '@/utils/constants'
-import { SHIFT_TIME_MAP, deptIcon, formatDateTime } from '@/utils/booking'
+import { cancelAppointment, payAppointment } from '@/api/appointment'
+import {
+  APPT_STATUS, APPT_STATUS_LABEL,
+  PAY_STATUS, PAY_STATUS_LABEL, PAY_STATUS_TAG_TYPE
+} from '@/utils/constants'
+import { SHIFT_TIME_MAP, deptIcon, formatDateTime, formatFee } from '@/utils/booking'
 import { useUserStore } from '@/stores/user'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusTag from '@/components/StatusTag.vue'
@@ -17,6 +20,7 @@ const user = useUserStore()
 // 从 sessionStorage 恢复（从 Appointments 列表点进来时携带）
 const appt = ref(null)
 const cancelLoading = ref(false)
+const payLoading = ref(false)
 
 onMounted(() => {
   try {
@@ -32,16 +36,49 @@ const tagTypeMap = {
   [APPT_STATUS.CANCELLED]: 'default'
 }
 
+// 就地同步 sessionStorage，保证返回列表再进来数据一致
+function syncStash() {
+  try { sessionStorage.setItem('hospital:apptDetail', JSON.stringify(appt.value)) } catch { /* ignore */ }
+}
+
 async function doCancel() {
   if (!appt.value) return
   try {
-    await ElMessageBox.confirm('确定取消该预约吗？', '提示', { type: 'warning', lockScroll: false })
+    const { value } = await ElMessageBox.prompt('确认取消该预约？可填写取消原因（选填）', '取消预约', {
+      type: 'warning',
+      lockScroll: false,
+      inputPlaceholder: '取消原因（选填）',
+      inputType: 'textarea',
+      confirmButtonText: '确认取消',
+      cancelButtonText: '再想想'
+    })
     cancelLoading.value = true
-    await cancelAppointment(appt.value.apptId)
+    await cancelAppointment(appt.value.apptId, value)
     ElMessage.success('已取消')
-    appt.value = { ...appt.value, status: APPT_STATUS.CANCELLED }
-  } catch { /* 取消或失败 */ } finally {
+    appt.value = {
+      ...appt.value,
+      status: APPT_STATUS.CANCELLED,
+      cancelReason: value || appt.value.cancelReason,
+      updateTime: new Date().toISOString()
+    }
+    syncStash()
+  } catch (e) {
+    if (e !== 'cancel' && e?.message) ElMessage.error(e.message)
+  } finally {
     cancelLoading.value = false
+  }
+}
+
+async function doPay() {
+  if (!appt.value) return
+  payLoading.value = true
+  try {
+    await payAppointment(appt.value.apptId)
+    ElMessage.success('挂号费支付成功')
+    appt.value = { ...appt.value, payStatus: PAY_STATUS.PAID, payTime: new Date().toISOString() }
+    syncStash()
+  } catch { /* 拦截器已弹错误 */ } finally {
+    payLoading.value = false
   }
 }
 
@@ -89,6 +126,22 @@ const tips = [
             <div class="info-grid__label">就诊时段</div>
             <div class="info-grid__value">{{ appt.shift }}（{{ SHIFT_TIME_MAP[appt.shift] || '' }}）</div>
           </div>
+          <div v-if="appt.queueNumber != null" class="info-grid__item">
+            <div class="info-grid__label">就诊排队号</div>
+            <div class="info-grid__value info-grid__queue">{{ appt.queueNumber }} 号</div>
+          </div>
+          <div class="info-grid__item">
+            <div class="info-grid__label">挂号费</div>
+            <div class="info-grid__value info-grid__fee">{{ formatFee(appt.fee ?? appt.amount) }}</div>
+          </div>
+          <div class="info-grid__item">
+            <div class="info-grid__label">支付状态</div>
+            <div class="info-grid__value">
+              <StatusTag :type="PAY_STATUS_TAG_TYPE[appt.payStatus] || 'warning'">
+                {{ PAY_STATUS_LABEL[appt.payStatus] ?? '待支付' }}
+              </StatusTag>
+            </div>
+          </div>
           <div class="info-grid__item">
             <div class="info-grid__label">挂号时间</div>
             <div class="info-grid__value">{{ formatDateTime(appt.createTime) }}</div>
@@ -96,6 +149,18 @@ const tips = [
           <div class="info-grid__item">
             <div class="info-grid__label">就诊人</div>
             <div class="info-grid__value">{{ user.displayName }}</div>
+          </div>
+        </div>
+
+        <!-- 取消原因 / 更新时间（已取消时展示） -->
+        <div v-if="appt.status === APPT_STATUS.CANCELLED" class="cancel-info">
+          <div class="cancel-info__row">
+            <span class="cancel-info__label">取消原因</span>
+            <span class="cancel-info__value">{{ appt.cancelReason || '未填写' }}</span>
+          </div>
+          <div v-if="appt.updateTime" class="cancel-info__row">
+            <span class="cancel-info__label">更新时间</span>
+            <span class="cancel-info__value">{{ formatDateTime(appt.updateTime) }}</span>
           </div>
         </div>
 
@@ -127,6 +192,13 @@ const tips = [
       <!-- 操作按钮 -->
       <div class="actions">
         <el-button size="large" @click="router.back()">返回列表</el-button>
+        <el-button
+          v-if="appt.status === APPT_STATUS.BOOKED && appt.payStatus === PAY_STATUS.UNPAID"
+          size="large"
+          type="primary"
+          :loading="payLoading"
+          @click="doPay"
+        >模拟支付</el-button>
         <el-button
           v-if="appt.status === APPT_STATUS.BOOKED"
           size="large"
@@ -179,6 +251,20 @@ const tips = [
 }
 .info-grid__label { font-size: var(--app-fs-caption); color: var(--app-text-3); margin-bottom: 4px; }
 .info-grid__value { font-size: var(--app-fs-body); color: var(--app-text-1); font-weight: 500; }
+.info-grid__queue { color: var(--app-brand-600); }
+.info-grid__fee { color: var(--app-danger-text); }
+
+/* ---- 取消信息 ---- */
+.cancel-info {
+  background: var(--app-bg-page);
+  border-radius: var(--app-radius-md);
+  padding: var(--app-sp-4);
+  margin-bottom: var(--app-sp-6);
+}
+.cancel-info__row { display: flex; gap: var(--app-sp-3); font-size: var(--app-fs-caption); }
+.cancel-info__row + .cancel-info__row { margin-top: var(--app-sp-2); }
+.cancel-info__label { color: var(--app-text-3); flex-shrink: 0; width: 64px; }
+.cancel-info__value { color: var(--app-text-1); }
 
 /* ---- 二维码占位 ---- */
 .qrcode-placeholder {

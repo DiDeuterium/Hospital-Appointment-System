@@ -102,6 +102,7 @@ onMounted(load)
       <table class="pt-table" v-if="filtered.length">
         <thead>
           <tr>
+            <th>排队号</th>
             <th>预约号</th>
             <th>姓名</th>
             <th>手机号</th>
@@ -112,6 +113,7 @@ onMounted(load)
         </thead>
         <tbody>
           <tr v-for="p in filtered" :key="p.apptId">
+            <td><span class="pt-table__queue">{{ p.queueNumber ?? '—' }}</span></td>
             <td><span class="pt-table__appt">#{{ p.apptId }}</span></td>
             <td class="pt-table__name">{{ p.realName }}</td>
             <td>{{ (p.phone || '').replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') }}</td>
@@ -179,6 +181,7 @@ onMounted(load)
 .pt-table tr:last-child td { border-bottom: none; }
 .pt-table tr:hover td { background: var(--app-bg-hover); }
 .pt-table__appt { color: var(--app-brand-600); font-weight: 500; font-variant-numeric: tabular-nums; }
+.pt-table__queue { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 24px; padding: 0 8px; border-radius: var(--app-radius-full); background: var(--app-brand-50); color: var(--app-brand-700); font-weight: 600; font-variant-numeric: tabular-nums; }
 .pt-table__name { font-weight: 500; color: var(--app-text-1); }
 .pt-table__time { color: var(--app-text-3); font-size: var(--app-fs-caption); white-space: nowrap; }
 .empty { text-align: center; padding: var(--app-sp-8); color: var(--app-text-3); font-size: var(--app-fs-caption); }

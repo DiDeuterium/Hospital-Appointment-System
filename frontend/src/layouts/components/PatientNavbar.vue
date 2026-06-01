@@ -11,7 +11,8 @@ const user = useUserStore()
 // 顶部主菜单（C 端体验，菜单项克制，常用功能放主导航，次要功能进下拉）
 const menus = [
   { label: '首页', to: '/patient/home' },
-  { label: '我的预约', to: '/patient/appointments' }
+  { label: '我的预约', to: '/patient/appointments' },
+  { label: '公告', to: '/patient/notices' }
 ]
 
 async function handleLogout() {

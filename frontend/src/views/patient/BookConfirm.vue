@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { createAppointment } from '@/api/appointment'
 import { useUserStore } from '@/stores/user'
-import { peekSchedule, stashResult, SHIFT_TIME_MAP } from '@/utils/booking'
+import { peekSchedule, stashResult, SHIFT_TIME_MAP, formatFee } from '@/utils/booking'
 import StatusTag from '@/components/StatusTag.vue'
 import StepFlow from '@/components/StepFlow.vue'
 import SectionCard from '@/components/SectionCard.vue'
@@ -87,6 +87,10 @@ async function doBook() {
             <span class="info-table__value">{{ schedule.shift }}（{{ SHIFT_TIME_MAP[schedule.shift] || '' }}）</span>
           </div>
           <div class="info-table__row">
+            <span class="info-table__label">挂号费</span>
+            <span class="info-table__value info-table__fee">{{ formatFee(schedule.fee) }}</span>
+          </div>
+          <div class="info-table__row">
             <span class="info-table__label">就诊人</span>
             <span class="info-table__value">{{ user.displayName }}</span>
           </div>
@@ -137,6 +141,7 @@ async function doBook() {
   align-items: center;
   gap: var(--app-sp-2);
 }
+.info-table__fee { color: var(--app-danger-text); font-weight: 600; }
 
 .tips { list-style: none; padding: 0; margin: 0; }
 .tips__item {

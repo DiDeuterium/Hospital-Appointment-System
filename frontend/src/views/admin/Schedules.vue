@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { listAdminSchedules, createSchedule, updateSchedule, deleteSchedule } from '@/api/schedule'
 import { listDoctors } from '@/api/doctor'
 import { SHIFT_OPTIONS } from '@/utils/constants'
+import { formatFee } from '@/utils/booking'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -13,9 +14,10 @@ const doctors = ref([])
 const loading = ref(false)
 const filters = reactive({ docId: '', workDate: '' })
 
+const blankForm = () => ({ scheduleId: null, docId: '', workDate: '', shift: '上午', totalQuota: 30, fee: 0 })
 const dialog = reactive({
   visible: false, isEdit: false,
-  form: { scheduleId: null, docId: '', workDate: '', shift: '上午', totalQuota: 30 }
+  form: blankForm()
 })
 const formRef = ref()
 const rules = {
@@ -38,7 +40,7 @@ async function loadDoctors() { doctors.value = await listDoctors({ deptId: '' })
 
 function openCreate() {
   dialog.isEdit = false
-  dialog.form = { scheduleId: null, docId: '', workDate: '', shift: '上午', totalQuota: 30 }
+  dialog.form = blankForm()
   dialog.visible = true
 }
 function openEdit(row) { dialog.isEdit = true; dialog.form = { ...row }; dialog.visible = true }
@@ -105,17 +107,19 @@ onBeforeUnmount(() => {
     <div v-loading="loading" class="table-wrap">
       <table class="st-table" v-if="list.length">
         <thead>
-          <tr><th>医生</th><th>日期</th><th>时段</th><th>总号源</th><th>剩余</th><th>状态</th><th>操作</th></tr>
+          <tr><th>医生</th><th>日期</th><th>时段</th><th>挂号费</th><th>总号源</th><th>剩余</th><th>状态</th><th>操作</th></tr>
         </thead>
         <tbody>
           <tr v-for="s in list" :key="s.scheduleId">
             <td class="st-table__name">{{ s.docName }}</td>
             <td>{{ s.workDate }}</td>
             <td>{{ s.shift }}</td>
+            <td class="st-table__fee">{{ formatFee(s.fee) }}</td>
             <td>{{ s.totalQuota }}</td>
             <td>{{ s.restQuota }}</td>
             <td>
-              <StatusTag :type="s.restQuota <= 0 ? 'danger' : s.restQuota < s.totalQuota * 0.3 ? 'warning' : 'success'" size="small">
+              <StatusTag v-if="s.status === 0" type="danger" size="small">停诊</StatusTag>
+              <StatusTag v-else :type="s.restQuota <= 0 ? 'danger' : s.restQuota < s.totalQuota * 0.3 ? 'warning' : 'success'" size="small">
                 {{ s.restQuota <= 0 ? '约满' : s.restQuota < s.totalQuota * 0.3 ? '紧张' : '充足' }}
               </StatusTag>
             </td>
@@ -148,6 +152,9 @@ onBeforeUnmount(() => {
         <el-form-item label="号源总数" prop="totalQuota">
           <el-input-number v-model="dialog.form.totalQuota" :min="1" :max="200" size="large" />
         </el-form-item>
+        <el-form-item label="挂号费（元）" prop="fee">
+          <el-input-number v-model="dialog.form.fee" :min="0" :precision="2" :step="1" size="large" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button size="large" @click="dialog.visible = false">取消</el-button>
@@ -170,6 +177,7 @@ onBeforeUnmount(() => {
 .st-table tr:last-child td { border-bottom: none; }
 .st-table tr:hover td { background: var(--app-bg-hover); }
 .st-table__name { font-weight: 500; color: var(--app-text-1); }
+.st-table__fee { color: var(--app-danger-text); font-weight: 600; }
 .st-table__actions { white-space: nowrap; }
 .empty { text-align: center; padding: var(--app-sp-8); color: var(--app-text-3); font-size: var(--app-fs-caption); }
 </style>

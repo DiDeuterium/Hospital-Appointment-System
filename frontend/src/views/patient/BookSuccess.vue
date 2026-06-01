@@ -1,16 +1,20 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { peekResult, SHIFT_TIME_MAP, clearBooking, formatDateTime } from '@/utils/booking'
+import { ElMessage } from 'element-plus'
+import { peekResult, clearBooking, formatDateTime, formatFee } from '@/utils/booking'
+import { payAppointment } from '@/api/appointment'
+import { PAY_STATUS, PAY_STATUS_LABEL, PAY_STATUS_TAG_TYPE } from '@/utils/constants'
 import StatusTag from '@/components/StatusTag.vue'
 import StepFlow from '@/components/StepFlow.vue'
 import SectionCard from '@/components/SectionCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 
 const router = useRouter()
-const result = peekResult()
+const result = ref(peekResult())
+const paying = ref(false)
 
-const expired = computed(() => !result)
+const expired = computed(() => !result.value)
 
 const steps = [
   { label: '选科室' },
@@ -19,6 +23,18 @@ const steps = [
   { label: '确认' },
   { label: '完成' }
 ]
+
+async function doPay() {
+  if (!result.value) return
+  paying.value = true
+  try {
+    await payAppointment(result.value.apptId)
+    result.value = { ...result.value, payStatus: PAY_STATUS.PAID, payTime: new Date().toISOString() }
+    ElMessage.success('挂号费支付成功')
+  } catch { /* 拦截器已弹错误 */ } finally {
+    paying.value = false
+  }
+}
 
 function goHome() { clearBooking(); router.replace({ name: 'PatientHome' }) }
 function goAppts() { clearBooking(); router.push({ name: 'PatientAppointments' }) }
@@ -44,7 +60,10 @@ function goAppts() { clearBooking(); router.push({ name: 'PatientAppointments' }
           <path d="M24 40l12 12 20-24" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         <h1 class="mark__title">预约挂号成功</h1>
-        <p class="mark__appt">您的预约号是 <strong>#{{ result?.apptId }}</strong></p>
+        <p class="mark__appt" v-if="result?.queueNumber != null">
+          您的就诊排队号是 <strong>{{ result.queueNumber }}</strong> 号
+        </p>
+        <p class="mark__appt" v-else>您的预约号是 <strong>#{{ result?.apptId }}</strong></p>
       </div>
 
       <SectionCard class="section-gap">
@@ -56,6 +75,30 @@ function goAppts() { clearBooking(); router.push({ name: 'PatientAppointments' }
           <div class="info-table__row">
             <span class="info-table__label">预约单号</span>
             <span class="info-table__value">#{{ result?.apptId }}</span>
+          </div>
+          <div class="info-table__row" v-if="result?.queueNumber != null">
+            <span class="info-table__label">排队号</span>
+            <span class="info-table__value">{{ result.queueNumber }} 号</span>
+          </div>
+          <div class="info-table__row">
+            <span class="info-table__label">挂号费</span>
+            <span class="info-table__value info-table__fee">{{ formatFee(result?.fee ?? result?.amount) }}</span>
+          </div>
+          <div class="info-table__row">
+            <span class="info-table__label">支付状态</span>
+            <span class="info-table__value">
+              <StatusTag :type="PAY_STATUS_TAG_TYPE[result?.payStatus] || 'warning'">
+                {{ PAY_STATUS_LABEL[result?.payStatus] ?? '待支付' }}
+              </StatusTag>
+              <el-button
+                v-if="result?.payStatus === PAY_STATUS.UNPAID"
+                type="primary"
+                size="small"
+                :loading="paying"
+                style="margin-left: 12px"
+                @click="doPay"
+              >模拟支付</el-button>
+            </span>
           </div>
           <div class="info-table__row" v-if="result?.createTime">
             <span class="info-table__label">挂号时间</span>
@@ -124,6 +167,7 @@ function goAppts() { clearBooking(); router.push({ name: 'PatientAppointments' }
   color: var(--app-text-1);
   font-weight: 500;
 }
+.info-table__fee { color: var(--app-danger-text); font-weight: 600; }
 
 .tips { list-style: none; padding: 0; margin: 0; }
 .tips__item {

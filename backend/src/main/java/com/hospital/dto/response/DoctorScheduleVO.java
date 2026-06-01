@@ -12,4 +12,5 @@ public class DoctorScheduleVO {
     private Integer totalQuota;
     private Integer restQuota;
     private Integer appointedCount;
+    private Integer status;
 }

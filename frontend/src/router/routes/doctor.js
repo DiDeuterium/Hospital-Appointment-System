@@ -26,6 +26,18 @@ export default [
         name: 'DoctorPatients',
         component: () => import('@/views/doctor/PatientRoster.vue'),
         meta: { ...meta, title: '患者名册', hidden: true }
+      },
+      {
+        path: 'change-requests',
+        name: 'DoctorChangeRequests',
+        component: () => import('@/views/doctor/ChangeRequests.vue'),
+        meta: { ...meta, title: '我的申请', icon: 'file-text' }
+      },
+      {
+        path: 'profile',
+        name: 'DoctorProfile',
+        component: () => import('@/views/doctor/Profile.vue'),
+        meta: { ...meta, title: '个人资料', icon: 'user' }
       }
     ]
   }

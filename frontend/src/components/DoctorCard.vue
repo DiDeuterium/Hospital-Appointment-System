@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import StatusTag from './StatusTag.vue'
 import AppIcon from './AppIcon.vue'
 import { genderEmoji } from '@/utils/booking'
@@ -8,12 +9,24 @@ defineProps({
   doctor: { type: Object, required: true }
 })
 defineEmits(['view-detail'])
+
+// 头像加载失败时回退到性别 emoji
+const imgError = ref(false)
 </script>
 
 <template>
   <article class="doctor-card">
     <div class="doctor-card__head">
-      <div class="doctor-card__avatar">{{ genderEmoji(doctor.gender) }}</div>
+      <div class="doctor-card__avatar">
+        <img
+          v-if="doctor.avatarUrl && !imgError"
+          :src="doctor.avatarUrl"
+          :alt="doctor.docName"
+          class="doctor-card__img"
+          @error="imgError = true"
+        />
+        <span v-else>{{ genderEmoji(doctor.gender) }}</span>
+      </div>
       <div class="doctor-card__main">
         <div class="doctor-card__name-row">
           <h3 class="doctor-card__name">{{ doctor.docName }}</h3>
@@ -28,7 +41,7 @@ defineEmits(['view-detail'])
     </div>
 
     <p class="doctor-card__bio">
-      <slot name="bio">擅长方向暂未填充（系统预留字段）</slot>
+      <slot name="bio">{{ doctor.specialty || '擅长方向暂未填充' }}</slot>
     </p>
 
     <footer class="doctor-card__footer">
@@ -71,6 +84,12 @@ defineEmits(['view-detail'])
   justify-content: center;
   font-size: 26px;
   flex-shrink: 0;
+  overflow: hidden;
+}
+.doctor-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .doctor-card__main { flex: 1; min-width: 0; }
 .doctor-card__name-row {

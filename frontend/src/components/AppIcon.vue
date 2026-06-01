@@ -49,6 +49,7 @@ const PATHS = {
   stethoscope: 'M11 2v8a4 4 0 1 1-8 0V2M7 14v4a4 4 0 0 0 8 0v-1a4 4 0 0 1 4-4M19 9a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
   pill: 'M10.5 20.5L20 11a4.95 4.95 0 0 0-7-7l-9.5 9.5a4.95 4.95 0 0 0 7 7zM8.5 8.5l7 7',
   syringe: 'M18 2l4 4M15 5l4 4M11 9l4 4M7 13l4 4M3 17l4 4M14 8l-2-2M16 6l2 2M9 12L7 14',
+  'credit-card': 'M2 5h20v14H2zM2 10h20',
   qrcode: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM20 14h1v3M14 20h3v1M21 21h-1'
 }
 

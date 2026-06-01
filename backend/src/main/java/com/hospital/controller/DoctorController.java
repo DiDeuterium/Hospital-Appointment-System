@@ -100,6 +100,7 @@ public class DoctorController {
                     vo.setTotalQuota(s.getTotalQuota());
                     vo.setRestQuota(s.getRestQuota());
                     vo.setAppointedCount(s.getTotalQuota() - s.getRestQuota());
+                    vo.setStatus(s.getStatus());
                     return vo;
                 }).toList();
         return Result.ok(vos);

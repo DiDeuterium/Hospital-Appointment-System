@@ -18,6 +18,7 @@ public class ScheduleVO {
     private Integer totalQuota;
     private Integer restQuota;
     private BigDecimal fee;
+    private Integer status;
     private String avatarUrl;
     private String specialty;
 }

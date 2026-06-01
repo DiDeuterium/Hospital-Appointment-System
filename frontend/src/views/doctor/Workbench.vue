@@ -93,6 +93,14 @@ onMounted(load)
           <span class="shortcuts__icon"><AppIcon name="calendar" :size="22" /></span>
           <span class="shortcuts__label">全部排班</span>
         </button>
+        <button class="shortcuts__item" @click="router.push('/doctor/change-requests')">
+          <span class="shortcuts__icon"><AppIcon name="file-text" :size="22" /></span>
+          <span class="shortcuts__label">我的申请</span>
+        </button>
+        <button class="shortcuts__item" @click="router.push('/doctor/profile')">
+          <span class="shortcuts__icon"><AppIcon name="user" :size="22" /></span>
+          <span class="shortcuts__label">个人资料</span>
+        </button>
       </div>
     </SectionCard>
   </div>

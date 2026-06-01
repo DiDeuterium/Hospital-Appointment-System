@@ -40,6 +40,19 @@ export function genderEmoji(gender) {
   return '🩺'
 }
 
+// 挂号费格式化：数字 → ¥xx.xx（空值回退 —）
+export function formatFee(v) {
+  if (v === null || v === undefined || v === '') return '—'
+  const n = Number(v)
+  if (Number.isNaN(n)) return '—'
+  return '¥' + n.toFixed(2)
+}
+
+// 头像地址：为空返回 ''（由组件回退到 emoji 占位）
+export function resolveAvatar(url) {
+  return url || ''
+}
+
 // 科室名 → 装饰图标（按关键词推断，纯前端美化）
 export function deptIcon(name = '') {
   if (/心/.test(name)) return '❤️'

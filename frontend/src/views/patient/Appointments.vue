@@ -2,10 +2,13 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { listMyAppointments, cancelAppointment } from '@/api/appointment'
+import { listMyAppointments, cancelAppointment, payAppointment } from '@/api/appointment'
 import { useUserStore } from '@/stores/user'
-import { APPT_STATUS, APPT_STATUS_LABEL, APPT_STATUS_TAG_TYPE } from '@/utils/constants'
-import { deptIcon, SHIFT_TIME_MAP } from '@/utils/booking'
+import {
+  APPT_STATUS, APPT_STATUS_LABEL,
+  PAY_STATUS, PAY_STATUS_LABEL, PAY_STATUS_TAG_TYPE
+} from '@/utils/constants'
+import { deptIcon, SHIFT_TIME_MAP, formatFee } from '@/utils/booking'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -16,6 +19,7 @@ const user = useUserStore()
 const allList = ref([])
 const tab = ref('')
 const loading = ref(false)
+const payingId = ref(null)
 
 const statusTabs = [
   { key: '',       label: '全部' },
@@ -61,12 +65,30 @@ async function load() {
 
 async function cancel(row) {
   try {
-    await ElMessageBox.confirm('确定取消该预约吗？', '提示', { type: 'warning', lockScroll: false })
-    await cancelAppointment(row.apptId)
+    const { value } = await ElMessageBox.prompt('确认取消该预约？可填写取消原因（选填）', '取消预约', {
+      type: 'warning',
+      lockScroll: false,
+      inputPlaceholder: '取消原因（选填）',
+      inputType: 'textarea',
+      confirmButtonText: '确认取消',
+      cancelButtonText: '再想想'
+    })
+    await cancelAppointment(row.apptId, value)
     ElMessage.success('已取消')
     load()
   } catch (e) {
     if (e !== 'cancel' && e?.message) ElMessage.error(e.message)
+  }
+}
+
+async function pay(row) {
+  payingId.value = row.apptId
+  try {
+    await payAppointment(row.apptId)
+    ElMessage.success('挂号费支付成功')
+    load()
+  } catch { /* 拦截器已弹错误 */ } finally {
+    payingId.value = null
   }
 }
 
@@ -131,13 +153,33 @@ onMounted(load)
               <AppIcon name="clock" :size="14" />
               <span>{{ SHIFT_TIME_MAP[a.shift] || '' }}</span>
             </div>
+            <div v-if="a.queueNumber != null" class="appt-card__info-item">
+              <span class="appt-card__label">排队号</span>
+              <span class="appt-card__queue">{{ a.queueNumber }}</span>
+            </div>
             <div class="appt-card__info-item">
-              <span class="appt-card__label">预约号</span>
-              <span>#{{ a.apptId }}</span>
+              <span class="appt-card__label">挂号费</span>
+              <span class="appt-card__fee">{{ formatFee(a.fee ?? a.amount) }}</span>
+            </div>
+            <div class="appt-card__info-item">
+              <StatusTag :type="PAY_STATUS_TAG_TYPE[a.payStatus] || 'warning'" size="small">
+                {{ PAY_STATUS_LABEL[a.payStatus] ?? '待支付' }}
+              </StatusTag>
             </div>
           </div>
 
-          <footer v-if="a.status === APPT_STATUS.BOOKED" class="appt-card__footer" @click.stop>
+          <footer
+            v-if="a.status === APPT_STATUS.BOOKED"
+            class="appt-card__footer"
+            @click.stop
+          >
+            <el-button
+              v-if="a.payStatus === PAY_STATUS.UNPAID"
+              size="small"
+              type="primary"
+              :loading="payingId === a.apptId"
+              @click="pay(a)"
+            >模拟支付</el-button>
             <el-button size="small" plain @click="cancel(a)">取消预约</el-button>
           </footer>
         </article>
@@ -243,9 +285,12 @@ onMounted(load)
   color: var(--app-text-2);
 }
 .appt-card__label { color: var(--app-text-3); }
+.appt-card__queue { color: var(--app-brand-600); font-weight: 600; font-variant-numeric: tabular-nums; }
+.appt-card__fee { color: var(--app-danger-text); font-weight: 600; }
 .appt-card__footer {
   display: flex;
   justify-content: flex-end;
+  gap: var(--app-sp-2);
   padding-top: var(--app-sp-3);
   border-top: 1px solid var(--app-border-light);
 }
