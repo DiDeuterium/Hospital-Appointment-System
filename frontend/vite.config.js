@@ -28,6 +28,11 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: proxyTarget,
           changeOrigin: true
+        },
+        // 医生头像由后端静态资源 /avatars/doctor-N.png 提供（不带 /api 前缀），需单独代理
+        '/avatars': {
+          target: proxyTarget,
+          changeOrigin: true
         }
       }
     },

@@ -4,8 +4,9 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { listMyAppointments } from '@/api/appointment'
 import { listDepartments } from '@/api/department'
+import { listNotices } from '@/api/notice'
 import { APPT_STATUS, APPT_STATUS_LABEL } from '@/utils/constants'
-import { deptIcon } from '@/utils/booking'
+import { deptIcon, formatDateTime } from '@/utils/booking'
 import StatusTag from '@/components/StatusTag.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import StatCard from '@/components/StatCard.vue'
@@ -17,7 +18,18 @@ const user = useUserStore()
 
 const allAppts = ref([])
 const hotDepts = ref([])
+const notices = ref([])
 const loading = ref(false)
+
+// 置顶优先 + 发布时间倒序，首页只取前 3 条
+const topNotices = computed(() =>
+  [...notices.value]
+    .sort((a, b) => {
+      if ((b.isTop || 0) !== (a.isTop || 0)) return (b.isTop || 0) - (a.isTop || 0)
+      return String(b.publishTime || '').localeCompare(String(a.publishTime || ''))
+    })
+    .slice(0, 3)
+)
 
 // 去重后的三个入口：科室挂号 / 我的预约 / 个人中心
 const shortcuts = [
@@ -48,12 +60,14 @@ onMounted(async () => {
   loading.value = true
   try {
     const pid = user.profile?.patientId
-    const [depts, appts] = await Promise.all([
+    const [depts, appts, noticeList] = await Promise.all([
       listDepartments(),
-      pid ? listMyAppointments(pid).catch(() => []) : []
+      pid ? listMyAppointments(pid).catch(() => []) : [],
+      listNotices().catch(() => [])
     ])
     hotDepts.value = depts.slice(0, 4)
     allAppts.value = Array.isArray(appts) ? appts : []
+    notices.value = Array.isArray(noticeList) ? noticeList : []
   } catch { /* 后端没起时静默 */ } finally {
     loading.value = false
   }
@@ -110,6 +124,27 @@ onMounted(async () => {
           <el-button type="primary" @click="router.push('/patient/departments')">去挂号</el-button>
         </template>
       </EmptyState>
+    </SectionCard>
+
+    <!-- 系统公告 -->
+    <SectionCard v-if="topNotices.length" title="系统公告" class="section-gap">
+      <template #extra>
+        <router-link to="/patient/notices">查看全部</router-link>
+      </template>
+      <div class="notices">
+        <button
+          v-for="n in topNotices"
+          :key="n.noticeId"
+          type="button"
+          class="notices__item"
+          @click="router.push({ name: 'PatientNoticeDetail', params: { noticeId: n.noticeId } })"
+        >
+          <AppIcon name="bell" :size="16" class="notices__icon" />
+          <span class="notices__title">{{ n.title }}</span>
+          <StatusTag v-if="n.isTop" type="danger" size="small">置顶</StatusTag>
+          <span class="notices__time">{{ formatDateTime(n.publishTime) }}</span>
+        </button>
+      </div>
     </SectionCard>
 
     <!-- 快捷入口 -->
@@ -235,6 +270,31 @@ onMounted(async () => {
   gap: var(--app-sp-2);
 }
 .reminder__sep { color: var(--app-text-4); }
+
+/* ---- 系统公告 ---- */
+.notices { display: flex; flex-direction: column; gap: 2px; }
+.notices__item {
+  display: flex;
+  align-items: center;
+  gap: var(--app-sp-3);
+  padding: var(--app-sp-3);
+  border: none;
+  background: none;
+  border-radius: var(--app-radius-md);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background var(--app-transition-fast);
+}
+.notices__item:hover { background: var(--app-bg-subtle); }
+.notices__icon { color: var(--app-brand-500); flex-shrink: 0; }
+.notices__title {
+  flex: 1; min-width: 0;
+  font-size: var(--app-fs-body);
+  color: var(--app-text-1);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.notices__time { font-size: var(--app-fs-tiny); color: var(--app-text-4); flex-shrink: 0; }
 
 /* ---- 快捷入口 ---- */
 .shortcuts {

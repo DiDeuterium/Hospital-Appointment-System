@@ -22,7 +22,11 @@ const ICON_ALIAS = {
   users: 'users',
   calendar: 'calendar',
   dashboard: 'dashboard',
-  user: 'user'
+  user: 'user',
+  'file-text': 'file-text',
+  refresh: 'refresh',
+  'credit-card': 'credit-card',
+  bell: 'bell'
 }
 
 const menus = computed(() => {

@@ -81,6 +81,7 @@ onMounted(load)
         <el-radio-button value="">全部</el-radio-button>
         <el-radio-button value="上午">上午</el-radio-button>
         <el-radio-button value="下午">下午</el-radio-button>
+        <el-radio-button value="夜诊">夜诊</el-radio-button>
       </el-radio-group>
     </div>
 

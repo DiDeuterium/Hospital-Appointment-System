@@ -1,11 +1,12 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { listDoctors, createDoctor, updateDoctor, deleteDoctor } from '@/api/doctor'
-import { listDepartments } from '@/api/department'
+import { listDoctors, createDoctor, updateDoctor, deleteDoctor, toggleDoctorStatus } from '@/api/doctor'
+import { listAdminDepartments } from '@/api/department'
 import { GENDER_OPTIONS, GENDER_LABEL } from '@/utils/constants'
 import { genderEmoji } from '@/utils/booking'
 import PageHeader from '@/components/PageHeader.vue'
+import StatusTag from '@/components/StatusTag.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 const list = ref([])
@@ -13,14 +14,16 @@ const depts = ref([])
 const loading = ref(false)
 const filterDeptId = ref('')
 const viewMode = ref('table')
+// 头像加载失败回退（按 docId 记录）
+const avatarError = reactive({})
 
+const blankForm = () => ({ docId: '', docName: '', gender: 'M', title: '', deptId: '', password: '', avatarUrl: '', specialty: '' })
 const dialog = reactive({
   visible: false, isEdit: false,
-  form: { docId: '', docName: '', gender: 'M', title: '', deptId: '', password: '' }
+  form: blankForm()
 })
 const formRef = ref()
 const rules = {
-  docId: [{ required: true, message: '请输入工号', trigger: 'blur' }],
   docName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
   deptId: [{ required: true, message: '请选择科室', trigger: 'change' }]
@@ -33,11 +36,11 @@ async function load() {
     list.value = await listDoctors(params)
   } catch {} finally { loading.value = false }
 }
-async function loadDepts() { depts.value = await listDepartments() }
+async function loadDepts() { depts.value = await listAdminDepartments() }
 
 function openCreate() {
   dialog.isEdit = false
-  dialog.form = { docId: '', docName: '', gender: 'M', title: '', deptId: '', password: '' }
+  dialog.form = blankForm()
   dialog.visible = true
 }
 function openEdit(row) {
@@ -54,7 +57,8 @@ async function submit() {
       await updateDoctor(payload.docId, payload)
       ElMessage.success('修改成功')
     } else {
-      await createDoctor(dialog.form)
+      const { docId, ...payload } = dialog.form
+      await createDoctor(payload)
       ElMessage.success('新增成功')
     }
     dialog.visible = false; load()
@@ -66,6 +70,20 @@ async function remove(row) {
     await deleteDoctor(row.docId)
     ElMessage.success('已删除'); load()
   } catch {}
+}
+
+async function toggleStatus(row) {
+  const next = row.status === 1 ? 0 : 1
+  try {
+    if (next === 0) {
+      await ElMessageBox.confirm('停用后该医生无法登录、且不再展示给患者，历史数据保留。确认停用？', '提示', { type: 'warning', lockScroll: false })
+    }
+    await toggleDoctorStatus(row.docId, next)
+    ElMessage.success(next === 1 ? '已启用' : '已停用')
+    load()
+  } catch (e) {
+    if (e !== 'cancel' && e?.message) ElMessage.error(e.message)
+  }
 }
 
 function deptName(deptId) {
@@ -116,17 +134,32 @@ onBeforeUnmount(() => {
     <div v-if="viewMode === 'table'" v-loading="loading" class="table-wrap">
       <table class="dc-table" v-if="list.length">
         <thead>
-          <tr><th>工号</th><th>姓名</th><th>性别</th><th>职称</th><th>科室</th><th>操作</th></tr>
+          <tr><th>头像</th><th>工号</th><th>姓名</th><th>性别</th><th>职称</th><th>科室</th><th>擅长</th><th>状态</th><th>操作</th></tr>
         </thead>
         <tbody>
           <tr v-for="d in list" :key="d.docId">
+            <td>
+              <span class="dc-table__avatar">
+                <img v-if="d.avatarUrl && !avatarError[d.docId]" :src="d.avatarUrl" :alt="d.docName" @error="avatarError[d.docId] = true" />
+                <span v-else>{{ genderEmoji(d.gender) }}</span>
+              </span>
+            </td>
             <td>{{ d.docId }}</td>
             <td class="dc-table__name">{{ d.docName }}</td>
             <td>{{ GENDER_LABEL[d.gender] || '—' }}</td>
             <td>{{ d.title || '—' }}</td>
             <td>{{ deptName(d.deptId) }}</td>
+            <td class="dc-table__spec">{{ (d.specialty || '').slice(0, 20) || '—' }}</td>
+            <td>
+              <StatusTag :type="d.status === 0 ? 'danger' : 'success'" size="small">
+                {{ d.status === 0 ? '停用' : '正常' }}
+              </StatusTag>
+            </td>
             <td class="dc-table__actions">
               <el-button size="small" @click="openEdit(d)">编辑</el-button>
+              <el-button size="small" :type="d.status === 1 ? 'warning' : 'success'" plain @click="toggleStatus(d)">
+                {{ d.status === 1 ? '停用' : '启用' }}
+              </el-button>
               <el-button size="small" type="danger" plain @click="remove(d)">删除</el-button>
             </td>
           </tr>
@@ -138,7 +171,10 @@ onBeforeUnmount(() => {
     <!-- 卡片视图 -->
     <div v-else v-loading="loading" class="card-grid">
       <article v-for="d in list" :key="d.docId" class="doc-card">
-        <div class="doc-card__avatar">{{ genderEmoji(d.gender) }}</div>
+        <div class="doc-card__avatar">
+          <img v-if="d.avatarUrl && !avatarError[d.docId]" :src="d.avatarUrl" :alt="d.docName" @error="avatarError[d.docId] = true" />
+          <span v-else>{{ genderEmoji(d.gender) }}</span>
+        </div>
         <h3 class="doc-card__name">{{ d.docName }}</h3>
         <div class="doc-card__meta">
           <span>{{ GENDER_LABEL[d.gender] }}</span>
@@ -146,8 +182,14 @@ onBeforeUnmount(() => {
           <span>{{ d.title || '—' }}</span>
         </div>
         <div class="doc-card__dept">{{ deptName(d.deptId) }}</div>
+        <StatusTag :type="d.status === 0 ? 'danger' : 'success'" size="small">
+          {{ d.status === 0 ? '停用' : '正常' }}
+        </StatusTag>
         <div class="doc-card__actions">
           <el-button size="small" @click="openEdit(d)">编辑</el-button>
+          <el-button size="small" :type="d.status === 1 ? 'warning' : 'success'" plain @click="toggleStatus(d)">
+            {{ d.status === 1 ? '停用' : '启用' }}
+          </el-button>
           <el-button size="small" type="danger" plain @click="remove(d)">删除</el-button>
         </div>
       </article>
@@ -155,8 +197,8 @@ onBeforeUnmount(() => {
 
     <el-dialog v-model="dialog.visible" :title="dialog.isEdit ? '修改医生' : '新增医生'" width="500px" :lock-scroll="false">
       <el-form ref="formRef" :model="dialog.form" :rules="rules" label-position="top">
-        <el-form-item label="工号" prop="docId">
-          <el-input v-model="dialog.form.docId" :disabled="dialog.isEdit" size="large" />
+        <el-form-item v-if="dialog.isEdit" label="工号">
+          <el-input v-model="dialog.form.docId" disabled size="large" />
         </el-form-item>
         <el-form-item label="姓名" prop="docName">
           <el-input v-model="dialog.form.docName" size="large" />
@@ -171,6 +213,12 @@ onBeforeUnmount(() => {
           <el-select v-model="dialog.form.deptId" placeholder="选择科室" size="large" style="width:100%">
             <el-option v-for="d in depts" :key="d.deptId" :label="d.deptName" :value="d.deptId" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="头像 URL">
+          <el-input v-model="dialog.form.avatarUrl" placeholder="如 /avatars/doctor-1.png" clearable size="large" />
+        </el-form-item>
+        <el-form-item label="擅长领域">
+          <el-input v-model="dialog.form.specialty" type="textarea" :rows="2" maxlength="500" placeholder="医生擅长方向" />
         </el-form-item>
         <el-form-item :label="dialog.isEdit ? '重置密码' : '初始密码'">
           <el-input v-model="dialog.form.password" type="password" show-password size="large" :placeholder="dialog.isEdit ? '留空则不修改' : '请输入初始密码'" />
@@ -210,6 +258,13 @@ onBeforeUnmount(() => {
 .dc-table tr:hover td { background: var(--app-bg-hover); }
 .dc-table__name { font-weight: 500; color: var(--app-text-1); }
 .dc-table__actions { white-space: nowrap; }
+.dc-table__spec { color: var(--app-text-3); font-size: var(--app-fs-caption); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-table__avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%; background: var(--app-brand-50);
+  font-size: 18px; overflow: hidden;
+}
+.dc-table__avatar img { width: 100%; height: 100%; object-fit: cover; }
 .empty { text-align: center; padding: var(--app-sp-8); color: var(--app-text-3); font-size: var(--app-fs-caption); }
 
 /* 卡片 */
@@ -221,7 +276,8 @@ onBeforeUnmount(() => {
   transition: all var(--app-transition-fast);
 }
 .doc-card:hover { border-color: var(--app-border); box-shadow: var(--app-shadow-sm); }
-.doc-card__avatar { font-size: 36px; width: 64px; height: 64px; border-radius: 50%; background: var(--app-brand-50); display: flex; align-items: center; justify-content: center; }
+.doc-card__avatar { font-size: 36px; width: 64px; height: 64px; border-radius: 50%; background: var(--app-brand-50); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.doc-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
 .doc-card__name { font-size: var(--app-fs-h3); font-weight: 600; color: var(--app-text-1); margin: 0; }
 .doc-card__meta { font-size: var(--app-fs-caption); color: var(--app-text-3); display: flex; align-items: center; gap: var(--app-sp-2); }
 .doc-card__sep { color: var(--app-text-4); }

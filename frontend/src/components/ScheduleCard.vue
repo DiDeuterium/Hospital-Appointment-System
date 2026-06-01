@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import StatusTag from './StatusTag.vue'
 import QuotaBar from './QuotaBar.vue'
 import AppIcon from './AppIcon.vue'
-import { SHIFT_TIME_MAP } from '@/utils/booking'
+import { SHIFT_TIME_MAP, formatFee } from '@/utils/booking'
 
 const props = defineProps({
   schedule: { type: Object, required: true }
@@ -32,6 +32,9 @@ const timeRange = computed(() => SHIFT_TIME_MAP[props.schedule.shift] || '')
     <QuotaBar :total="schedule.totalQuota" :rest="schedule.restQuota" />
 
     <footer class="schedule-card__footer">
+      <span class="schedule-card__fee">
+        挂号费 <strong>{{ formatFee(schedule.fee) }}</strong>
+      </span>
       <el-button
         type="primary"
         :disabled="isFull"
@@ -111,6 +114,17 @@ const timeRange = computed(() => SHIFT_TIME_MAP[props.schedule.shift] || '')
 
 .schedule-card__footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-sp-2);
+}
+.schedule-card__fee {
+  font-size: var(--app-fs-caption);
+  color: var(--app-text-3);
+}
+.schedule-card__fee strong {
+  color: var(--app-danger-text);
+  font-size: var(--app-fs-body);
+  font-weight: 600;
 }
 </style>

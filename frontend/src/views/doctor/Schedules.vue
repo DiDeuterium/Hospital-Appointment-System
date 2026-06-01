@@ -1,9 +1,12 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { myDoctorSchedules } from '@/api/doctor'
+import { submitChangeRequest } from '@/api/changeRequest'
 import { useUserStore } from '@/stores/user'
 import { formatDate, weekdayCN } from '@/utils/booking'
+import { SHIFT_OPTIONS, CHANGE_TYPE, SCHEDULE_STATUS } from '@/utils/constants'
 import PageHeader from '@/components/PageHeader.vue'
 import SectionCard from '@/components/SectionCard.vue'
 import StatusTag from '@/components/StatusTag.vue'
@@ -17,6 +20,57 @@ const viewMode = ref('list') // 'list' | 'calendar'
 const selectedMonth = ref(new Date())
 
 const filters = ref({ workDate: '' })
+
+// 排班变更申请弹窗
+const dialog = reactive({
+  visible: false,
+  submitting: false,
+  schedule: null,
+  form: { changeType: CHANGE_TYPE.CANCEL, targetWorkDate: '', targetShift: '', targetTotalQuota: null, reason: '' }
+})
+
+function isStopped(s) {
+  return s.status === SCHEDULE_STATUS.STOPPED
+}
+
+function openChange(row, type) {
+  dialog.schedule = row
+  dialog.form = {
+    changeType: type,
+    targetWorkDate: '',
+    targetShift: '',
+    targetTotalQuota: row.totalQuota,
+    reason: ''
+  }
+  dialog.visible = true
+}
+
+async function submitChange() {
+  const f = dialog.form
+  if (!f.reason || !f.reason.trim()) {
+    ElMessage.warning('请填写申请原因')
+    return
+  }
+  if (f.changeType === CHANGE_TYPE.MODIFY && !f.targetWorkDate && !f.targetShift && f.targetTotalQuota == null) {
+    ElMessage.warning('修改排班申请至少填写一项目标内容')
+    return
+  }
+  dialog.submitting = true
+  try {
+    const payload = { changeType: f.changeType, reason: f.reason.trim() }
+    if (f.changeType === CHANGE_TYPE.MODIFY) {
+      payload.targetWorkDate = f.targetWorkDate || null
+      payload.targetShift = f.targetShift || null
+      payload.targetTotalQuota = f.targetTotalQuota ?? null
+    }
+    await submitChangeRequest(dialog.schedule.scheduleId, payload)
+    ElMessage.success('申请提交成功，等待管理员审核')
+    dialog.visible = false
+    load()
+  } catch { /* 拦截器已弹错误 */ } finally {
+    dialog.submitting = false
+  }
+}
 
 // 日历数据
 const calendarDays = computed(() => {
@@ -74,17 +128,22 @@ onMounted(load)
       :breadcrumbs="[{ label: '工作台', to: '/doctor' }, { label: '我的排班' }]"
     >
       <template #extra>
-        <div class="view-toggle">
-          <button
-            class="view-toggle__btn"
-            :class="{ 'is-active': viewMode === 'list' }"
-            @click="viewMode = 'list'"
-          >列表</button>
-          <button
-            class="view-toggle__btn"
-            :class="{ 'is-active': viewMode === 'calendar' }"
-            @click="viewMode = 'calendar'"
-          >日历</button>
+        <div class="head-extra">
+          <el-button @click="router.push('/doctor/change-requests')">
+            <AppIcon name="file-text" :size="14" style="margin-right:4px" />我的申请
+          </el-button>
+          <div class="view-toggle">
+            <button
+              class="view-toggle__btn"
+              :class="{ 'is-active': viewMode === 'list' }"
+              @click="viewMode = 'list'"
+            >列表</button>
+            <button
+              class="view-toggle__btn"
+              :class="{ 'is-active': viewMode === 'calendar' }"
+              @click="viewMode = 'calendar'"
+            >日历</button>
+          </div>
         </div>
       </template>
     </PageHeader>
@@ -109,10 +168,12 @@ onMounted(load)
         v-for="s in list"
         :key="s.scheduleId"
         class="schedule-card"
-        @click="viewPatients(s)"
       >
         <div class="schedule-card__head">
           <StatusTag type="primary">{{ s.shift }}</StatusTag>
+          <StatusTag :type="isStopped(s) ? 'danger' : 'success'" size="small">
+            {{ isStopped(s) ? '停诊' : '正常' }}
+          </StatusTag>
           <span class="schedule-card__date">{{ s.workDate }} {{ weekdayCN(s.workDate) }}</span>
         </div>
         <div class="schedule-card__body">
@@ -129,6 +190,11 @@ onMounted(load)
             <span class="schedule-card__val" style="color:var(--app-success-text)">{{ s.restQuota }}</span>
           </div>
         </div>
+        <footer class="schedule-card__footer">
+          <el-button size="small" @click="viewPatients(s)">查看名册</el-button>
+          <el-button size="small" plain :disabled="isStopped(s)" @click="openChange(s, CHANGE_TYPE.CANCEL)">申请停诊</el-button>
+          <el-button size="small" plain :disabled="isStopped(s)" @click="openChange(s, CHANGE_TYPE.MODIFY)">申请改排班</el-button>
+        </footer>
       </article>
       <div v-if="!loading && !list.length" class="empty">暂无排班数据</div>
     </div>
@@ -162,6 +228,49 @@ onMounted(load)
         </div>
       </div>
     </SectionCard>
+
+    <!-- 排班变更申请弹窗 -->
+    <el-dialog
+      v-model="dialog.visible"
+      :title="dialog.form.changeType === CHANGE_TYPE.CANCEL ? '申请停诊' : '申请修改排班'"
+      width="480px"
+      :lock-scroll="false"
+    >
+      <div v-if="dialog.schedule" class="dialog-origin">
+        原排班：{{ dialog.schedule.workDate }} {{ dialog.schedule.shift }} · 总号源 {{ dialog.schedule.totalQuota }} · 剩余 {{ dialog.schedule.restQuota }}
+      </div>
+      <el-form label-position="top">
+        <el-form-item label="申请类型">
+          <el-radio-group v-model="dialog.form.changeType">
+            <el-radio-button :value="CHANGE_TYPE.CANCEL">停诊</el-radio-button>
+            <el-radio-button :value="CHANGE_TYPE.MODIFY">修改排班</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+
+        <template v-if="dialog.form.changeType === CHANGE_TYPE.MODIFY">
+          <p class="dialog-hint">以下三项至少填写一项；若该排班已有有效预约，仅可调整总号源。</p>
+          <el-form-item label="目标日期">
+            <el-date-picker v-model="dialog.form.targetWorkDate" type="date" value-format="YYYY-MM-DD" placeholder="不改则留空" size="large" style="width:100%" />
+          </el-form-item>
+          <el-form-item label="目标时段">
+            <el-select v-model="dialog.form.targetShift" placeholder="不改则留空" clearable size="large" style="width:100%">
+              <el-option v-for="s in SHIFT_OPTIONS" :key="s.value" :label="s.label" :value="s.value" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="目标总号源">
+            <el-input-number v-model="dialog.form.targetTotalQuota" :min="1" :max="200" size="large" />
+          </el-form-item>
+        </template>
+
+        <el-form-item label="申请原因" required>
+          <el-input v-model="dialog.form.reason" type="textarea" :rows="3" maxlength="255" show-word-limit placeholder="请填写申请原因" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button size="large" @click="dialog.visible = false">取消</el-button>
+        <el-button size="large" type="primary" :loading="dialog.submitting" @click="submitChange">提交申请</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -170,6 +279,7 @@ onMounted(load)
 .section-gap { margin-bottom: var(--app-sp-6); }
 
 .view-toggle { display: flex; border: 1px solid var(--app-border); border-radius: var(--app-radius-md); overflow: hidden; }
+.head-extra { display: flex; align-items: center; gap: var(--app-sp-3); }
 .view-toggle__btn {
   border: none; background: var(--app-bg-elevated); padding: 6px var(--app-sp-4);
   font-size: var(--app-fs-caption); font-weight: 500; color: var(--app-text-2); cursor: pointer;
@@ -183,7 +293,7 @@ onMounted(load)
 .schedule-list { display: flex; flex-direction: column; gap: var(--app-sp-3); }
 .schedule-card {
   background: var(--app-bg-elevated); border: 1px solid var(--app-border-light);
-  border-radius: var(--app-radius-lg); padding: var(--app-sp-5); cursor: pointer;
+  border-radius: var(--app-radius-lg); padding: var(--app-sp-5);
   transition: all var(--app-transition-fast);
 }
 .schedule-card:hover { border-color: var(--app-border); box-shadow: var(--app-shadow-sm); }
@@ -193,7 +303,11 @@ onMounted(load)
 .schedule-card__stat { display: flex; flex-direction: column; gap: 2px; }
 .schedule-card__lab { font-size: var(--app-fs-tiny); color: var(--app-text-3); }
 .schedule-card__val { font-size: var(--app-fs-h3); font-weight: 600; color: var(--app-text-1); font-variant-numeric: tabular-nums; }
+.schedule-card__footer { display: flex; justify-content: flex-end; gap: var(--app-sp-2); margin-top: var(--app-sp-4); padding-top: var(--app-sp-3); border-top: 1px solid var(--app-border-light); }
 .empty { text-align: center; padding: var(--app-sp-8); color: var(--app-text-3); font-size: var(--app-fs-caption); }
+
+.dialog-origin { font-size: var(--app-fs-caption); color: var(--app-text-2); background: var(--app-bg-page); border-radius: var(--app-radius-md); padding: var(--app-sp-3); margin-bottom: var(--app-sp-4); }
+.dialog-hint { font-size: var(--app-fs-tiny); color: var(--app-text-3); margin: 0 0 var(--app-sp-3); }
 
 /* 日历 */
 .cal-head { display: flex; align-items: center; justify-content: center; gap: var(--app-sp-4); margin-bottom: var(--app-sp-5); }

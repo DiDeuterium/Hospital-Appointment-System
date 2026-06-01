@@ -64,6 +64,18 @@ export default [
         meta: { ...meta, title: '预约详情', hidden: true }
       },
       {
+        path: 'notices',
+        name: 'PatientNotices',
+        component: () => import('@/views/patient/Notices.vue'),
+        meta: { ...meta, title: '系统公告' }
+      },
+      {
+        path: 'notices/:noticeId',
+        name: 'PatientNoticeDetail',
+        component: () => import('@/views/patient/NoticeDetail.vue'),
+        meta: { ...meta, title: '公告详情', hidden: true }
+      },
+      {
         path: 'profile',
         name: 'PatientProfile',
         component: () => import('@/views/patient/Profile.vue'),
