@@ -115,8 +115,8 @@ onMounted(load)
           <tr v-for="p in filtered" :key="p.apptId">
             <td><span class="pt-table__queue">{{ p.queueNumber ?? '—' }}</span></td>
             <td><span class="pt-table__appt">#{{ p.apptId }}</span></td>
-            <td class="pt-table__name">{{ p.realName }}</td>
-            <td>{{ (p.phone || '').replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') }}</td>
+            <td class="pt-table__name">{{ p.patientName }}</td>
+            <td>{{ (p.patientPhone || '').replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') }}</td>
             <td>
               <StatusTag :type="APPT_STATUS_TAG_TYPE[p.status] === 'primary' ? 'primary' : APPT_STATUS_TAG_TYPE[p.status] === 'success' ? 'success' : APPT_STATUS_TAG_TYPE[p.status] === 'warning' ? 'warning' : 'default'">
                 {{ APPT_STATUS_LABEL[p.status] || '未知' }}

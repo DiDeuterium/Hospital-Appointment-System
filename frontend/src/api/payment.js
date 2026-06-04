@@ -5,3 +5,8 @@ import request from './request'
 export function listPayments(params) {
   return request.get('/admin/payments', { params })
 }
+
+// 患者：我的支付记录
+export function listMyPayments() {
+  return request.get('/patients/me/payments')
+}

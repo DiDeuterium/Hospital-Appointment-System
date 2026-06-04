@@ -31,7 +31,7 @@ export default [
         path: 'schedules',
         name: 'AdminSchedules',
         component: () => import('@/views/admin/Schedules.vue'),
-        meta: { ...meta, title: '排班发布', icon: 'Calendar' }
+        meta: { ...meta, title: '排班管理', icon: 'Calendar' }
       },
       {
         path: 'change-requests',

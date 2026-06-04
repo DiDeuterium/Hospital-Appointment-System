@@ -5,6 +5,7 @@ import { getDoctorProfile, updateDoctorProfile, changeDoctorPassword } from '@/a
 import { listDepartments } from '@/api/department'
 import { GENDER_LABEL } from '@/utils/constants'
 import { genderEmoji } from '@/utils/booking'
+import request from '@/api/request'
 import PageHeader from '@/components/PageHeader.vue'
 import SectionCard from '@/components/SectionCard.vue'
 import StatusTag from '@/components/StatusTag.vue'
@@ -14,6 +15,7 @@ import AppIcon from '@/components/AppIcon.vue'
 const profileRef = ref()
 const loadingProfile = ref(false)
 const savingProfile = ref(false)
+const uploading = ref(false)
 const imgError = ref(false)
 const deptName = ref('')
 const profile = reactive({
@@ -40,6 +42,23 @@ async function loadProfile() {
   } catch { /* 拦截器已弹错误 */ } finally {
     loadingProfile.value = false
   }
+}
+
+async function handleAvatarUpload(options) {
+  const formData = new FormData()
+  formData.append('file', options.file)
+  uploading.value = true
+  try {
+    const res = await request.post('/doctors/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    profile.avatarUrl = res.avatarUrl
+    imgError.value = false
+    ElMessage.success('头像上传成功')
+  } catch { /* 拦截器已弹错误 */ } finally {
+    uploading.value = false
+  }
+  return false
 }
 
 async function saveProfile() {
@@ -146,8 +165,30 @@ onMounted(loadProfile)
       </div>
 
       <el-form ref="profileRef" :model="profile" label-position="top" @submit.prevent="saveProfile">
-        <el-form-item label="头像 URL">
-          <el-input v-model="profile.avatarUrl" placeholder="如 /avatars/doctor-1.png" clearable size="large" @input="imgError = false" />
+        <el-form-item label="头像">
+          <div class="avatar-upload">
+            <el-upload
+              :show-file-list="false"
+              :http-request="handleAvatarUpload"
+              accept="image/*"
+            >
+              <div class="avatar-upload__preview">
+                <img
+                  v-if="profile.avatarUrl && !imgError"
+                  :src="profile.avatarUrl"
+                  :alt="profile.docName"
+                  class="avatar-upload__img"
+                  @error="imgError = true"
+                />
+                <span v-else class="avatar-upload__emoji">{{ genderEmoji(profile.gender) }}</span>
+                <div class="avatar-upload__overlay">
+                  <AppIcon name="camera" :size="14" />
+                  <span>更换</span>
+                </div>
+              </div>
+            </el-upload>
+            <span class="avatar-upload__hint">支持 JPG / PNG，点击更换</span>
+          </div>
         </el-form-item>
         <el-form-item label="擅长领域">
           <el-input v-model="profile.specialty" type="textarea" :rows="3" maxlength="500" show-word-limit placeholder="填写你的擅长方向，将展示给患者" />
@@ -199,4 +240,19 @@ onMounted(loadProfile)
 .head__sep { color: var(--app-text-4); }
 
 .form-actions { display: flex; justify-content: flex-end; margin-top: var(--app-sp-2); }
+
+.avatar-upload { display: flex; flex-direction: column; align-items: center; gap: var(--app-sp-2); }
+.avatar-upload__preview {
+  width: 88px; height: 88px; border-radius: 50%; position: relative; cursor: pointer;
+  background: var(--app-brand-50); display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.avatar-upload__img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-upload__emoji { font-size: 40px; }
+.avatar-upload__overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,.35); color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; font-size: var(--app-fs-caption); opacity: 0; transition: opacity var(--app-transition-fast);
+}
+.avatar-upload__preview:hover .avatar-upload__overlay { opacity: 1; }
+.avatar-upload__hint { color: var(--app-text-3); font-size: var(--app-fs-caption); }
 </style>

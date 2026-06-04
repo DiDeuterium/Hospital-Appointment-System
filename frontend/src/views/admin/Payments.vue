@@ -92,11 +92,10 @@ onBeforeUnmount(() => { if (clockTimer) clearInterval(clockTimer) })
     <div v-loading="loading" class="table-wrap">
       <table class="pay-table" v-if="list.length">
         <thead>
-          <tr><th>支付号</th><th>预约单号</th><th>金额</th><th>支付状态</th><th>支付方式</th><th>支付时间</th><th>创建时间</th></tr>
+          <tr><th>预约单号</th><th>金额</th><th>支付状态</th><th>支付方式</th><th>支付时间</th><th>创建时间</th></tr>
         </thead>
         <tbody>
           <tr v-for="p in list" :key="p.paymentId">
-            <td>#{{ p.paymentId }}</td>
             <td><span class="pay-table__appt">#{{ p.apptId }}</span></td>
             <td class="pay-table__amount">{{ formatFee(p.amount) }}</td>
             <td>

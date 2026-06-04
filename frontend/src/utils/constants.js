@@ -40,23 +40,26 @@ export const SHIFT_OPTIONS = [
   { value: '夜诊', label: '夜诊' }
 ]
 
-// 挂号费模拟支付状态：0-待支付 1-已支付 2-已关闭
+// 挂号费模拟支付状态：0-待支付 1-已支付 2-已关闭 3-已退款
 export const PAY_STATUS = Object.freeze({
   UNPAID: 0,
   PAID: 1,
-  CLOSED: 2
+  CLOSED: 2,
+  REFUNDED: 3
 })
 
 export const PAY_STATUS_LABEL = {
   [PAY_STATUS.UNPAID]: '待支付',
   [PAY_STATUS.PAID]: '已支付',
-  [PAY_STATUS.CLOSED]: '已关闭'
+  [PAY_STATUS.CLOSED]: '已关闭',
+  [PAY_STATUS.REFUNDED]: '已退款'
 }
 
 export const PAY_STATUS_TAG_TYPE = {
   [PAY_STATUS.UNPAID]: 'warning',
   [PAY_STATUS.PAID]: 'success',
-  [PAY_STATUS.CLOSED]: 'info'
+  [PAY_STATUS.CLOSED]: 'info',
+  [PAY_STATUS.REFUNDED]: 'danger'
 }
 
 // 排班变更类型：1-停诊 2-修改排班

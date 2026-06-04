@@ -12,9 +12,14 @@ import com.hospital.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -55,6 +60,32 @@ public class DoctorController {
         if (body.getSpecialty() != null) doctor.setSpecialty(body.getSpecialty());
         doctorService.update(doctor.getDocId(), buildUpdateRequest(doctor));
         return Result.ok("资料更新成功", null);
+    }
+
+    @PostMapping("/me/avatar")
+    public Result<Map<String, String>> uploadAvatar(HttpServletRequest request,
+                                                     @RequestParam("file") MultipartFile file) throws IOException {
+        Integer docId = currentDoctorId(request);
+        Doctor doctor = doctorService.getById(docId);
+
+        String fileName = "doctor-" + docId + ".png";
+        byte[] bytes = file.getBytes();
+
+        // Write to src/main/resources/static/avatars (source)
+        Path srcPath = Path.of(System.getProperty("user.dir"), "src/main/resources/static/avatars", fileName);
+        Files.createDirectories(srcPath.getParent());
+        Files.write(srcPath, bytes);
+
+        // Also write to target/classes/static/avatars (runtime classpath)
+        Path targetPath = Path.of(System.getProperty("user.dir"), "target/classes/static/avatars", fileName);
+        Files.createDirectories(targetPath.getParent());
+        Files.write(targetPath, bytes);
+
+        String avatarUrl = "/avatars/" + fileName + "?t=" + System.currentTimeMillis();
+        doctor.setAvatarUrl(avatarUrl);
+        doctorService.update(docId, buildUpdateRequest(doctor));
+
+        return Result.ok("头像上传成功", Map.of("avatarUrl", avatarUrl));
     }
 
     @PutMapping("/me/password")
