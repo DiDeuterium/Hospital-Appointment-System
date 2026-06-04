@@ -63,15 +63,7 @@
 
 ### ER 关系
 
-```
-Department (1) ──── (N) Doctor (1) ──── (N) Schedule ──── (N) ScheduleChangeRequest
-                                                              │
-                                                              (N)
-                                                              │
-Patient (1) ──── (N) Appointment ──── (1) PaymentRecord      │
-                                              │               │
-AdminUser ──── SysNotice                       └─── ScheduleChangeRequest (审核)
-```
+![ER 图](docs/新版ER图.png)
 
 - **科室 → 医生**：1:N（一个科室多名医生，一名医生归属一个科室）
 - **医生 → 排班**：1:N（一名医生多条排班，一条排班属于一名医生）
