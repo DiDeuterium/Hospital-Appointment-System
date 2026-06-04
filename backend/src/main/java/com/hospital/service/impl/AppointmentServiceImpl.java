@@ -132,6 +132,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (schedule != null) {
             scheduleMapper.updateRestQuota(schedule.getScheduleId(), schedule.getRestQuota() + 1);
         }
+
+        // 若已支付则自动退款
+        LambdaQueryWrapper<PaymentRecord> prWrapper = new LambdaQueryWrapper<>();
+        prWrapper.eq(PaymentRecord::getApptId, apptId);
+        PaymentRecord pr = paymentRecordMapper.selectOne(prWrapper);
+        if (pr != null && pr.getPayStatus() == 1) {
+            pr.setPayStatus(3); // 已退款
+            paymentRecordMapper.updateById(pr);
+        }
     }
 
     @Override

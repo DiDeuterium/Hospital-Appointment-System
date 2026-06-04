@@ -102,12 +102,12 @@ CREATE TABLE payment_record (
     payment_id  INT           AUTO_INCREMENT PRIMARY KEY COMMENT '支付记录编号',
     appt_id     INT           NOT NULL UNIQUE            COMMENT '关联预约单号',
     amount      DECIMAL(8, 2) NOT NULL                   COMMENT '挂号费金额',
-    pay_status  TINYINT       NOT NULL DEFAULT 0         COMMENT '支付状态: 0待支付 1已支付 2已关闭',
+    pay_status  TINYINT       NOT NULL DEFAULT 0         COMMENT '支付状态: 0待支付 1已支付 2已关闭 3已退款',
     pay_method  VARCHAR(20)   NOT NULL DEFAULT '模拟支付' COMMENT '支付方式',
     pay_time    DATETIME                                 COMMENT '支付时间',
     create_time DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     CHECK (amount >= 0),
-    CHECK (pay_status IN (0, 1, 2)),
+    CHECK (pay_status IN (0, 1, 2, 3)),
     FOREIGN KEY (appt_id) REFERENCES appointment(appt_id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='挂号费模拟支付记录表';
 

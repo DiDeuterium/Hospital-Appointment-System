@@ -59,8 +59,8 @@ INSERT INTO patient (id_card, real_name, gender, phone, password) VALUES
 -- 4. 管理员数据
 -- 明文密码均为 admin123。
 INSERT INTO admin_user (username, real_name, password, status) VALUES
-('admin1', '肖国扬', '$2a$10$7JB720y4TlW9uWbNOhYfCe3SI4ZubBzKQ8J0J7GzhtxKCU2NvI7jC', 1),
-('admin2', '狄东琛', '$2a$10$7JB720y4TlW9uWbNOhYfCe3SI4ZubBzKQ8J0J7GzhtxKCU2NvI7jC', 1);
+('admin1', '肖国扬', '$2b$10$tBWuKr.5vKva7hIEI.raF.NA1zgsixZg1oSIFmS6LedgqIfcLDdPi', 1),
+('admin2', '狄东琛', '$2b$10$tBWuKr.5vKva7hIEI.raF.NA1zgsixZg1oSIFmS6LedgqIfcLDdPi', 1);
 
 -- 5. 排班数据
 -- 挂号费按职称设置：主任医师 50.00，副主任医师 35.00，主治医师 25.00。

@@ -3,10 +3,13 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { getMyProfile, updateMyProfile, changeMyPassword } from '@/api/patient'
-import { GENDER_OPTIONS, GENDER_LABEL } from '@/utils/constants'
+import { listMyPayments } from '@/api/payment'
+import { GENDER_OPTIONS, GENDER_LABEL, PAY_STATUS_LABEL, PAY_STATUS_TAG_TYPE } from '@/utils/constants'
 import { isPhone } from '@/utils/validators'
+import { formatDateTime, formatFee } from '@/utils/booking'
 import PageHeader from '@/components/PageHeader.vue'
 import SectionCard from '@/components/SectionCard.vue'
+import StatusTag from '@/components/StatusTag.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 const user = useUserStore()
@@ -56,7 +59,6 @@ async function saveProfile() {
       phone: profile.phone
     })
     Object.assign(profile, data)
-    // 同步 navbar 显示名 + localStorage
     user.updateProfile({ realName: data.realName })
     ElMessage.success('资料已保存')
   } catch { /* 拦截器已弹错误 */ } finally {
@@ -114,14 +116,30 @@ async function savePassword() {
   }
 }
 
-onMounted(loadProfile)
+// ---- 支付记录 ----
+const payments = ref([])
+const paymentsLoading = ref(false)
+
+async function loadPayments() {
+  paymentsLoading.value = true
+  try {
+    payments.value = await listMyPayments()
+  } catch { /* 拦截器已弹错误 */ } finally {
+    paymentsLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadProfile()
+  loadPayments()
+})
 </script>
 
 <template>
   <div class="page-container">
     <PageHeader
       title="个人中心"
-      subtitle="管理你的基本资料与登录密码"
+      subtitle="管理你的基本资料、登录密码与支付记录"
       :breadcrumbs="[{ label: '首页', to: '/patient/home' }, { label: '个人中心' }]"
     />
 
@@ -142,7 +160,6 @@ onMounted(loadProfile)
         label-position="top"
         @submit.prevent="saveProfile"
       >
-        <!-- 只读字段：身份证号（脱敏显示） -->
         <el-form-item label="身份证号">
           <el-input :model-value="maskIdCard(profile.idCard)" disabled size="large" />
         </el-form-item>
@@ -207,6 +224,32 @@ onMounted(loadProfile)
         </div>
       </el-form>
     </SectionCard>
+
+    <!-- 支付记录 -->
+    <SectionCard title="挂号费支付记录" class="section-gap">
+      <div v-loading="paymentsLoading">
+        <table class="pay-table" v-if="payments.length">
+          <thead>
+            <tr><th>预约单号</th><th>金额</th><th>支付状态</th><th>支付方式</th><th>支付时间</th><th>创建时间</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in payments" :key="p.paymentId">
+              <td><span class="pay-table__appt">#{{ p.apptId }}</span></td>
+              <td class="pay-table__amount">{{ formatFee(p.amount) }}</td>
+              <td>
+                <StatusTag :type="PAY_STATUS_TAG_TYPE[p.payStatus] || 'warning'" size="small">
+                  {{ PAY_STATUS_LABEL[p.payStatus] ?? '待支付' }}
+                </StatusTag>
+              </td>
+              <td>{{ p.payMethod || '模拟支付' }}</td>
+              <td class="pay-table__time">{{ p.payTime ? formatDateTime(p.payTime) : '—' }}</td>
+              <td class="pay-table__time">{{ formatDateTime(p.createTime) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div v-else class="empty">暂无支付记录</div>
+      </div>
+    </SectionCard>
   </div>
 </template>
 
@@ -248,8 +291,19 @@ onMounted(loadProfile)
   margin-top: var(--app-sp-2);
 }
 
+/* 支付记录表 */
+.pay-table { width: 100%; border-collapse: collapse; font-size: var(--app-fs-caption); }
+.pay-table th { text-align: left; padding: var(--app-sp-2) var(--app-sp-3); background: var(--app-bg-subtle); color: var(--app-text-3); font-weight: 500; border-bottom: 1px solid var(--app-border); white-space: nowrap; }
+.pay-table td { padding: var(--app-sp-2) var(--app-sp-3); border-bottom: 1px solid var(--app-border-light); color: var(--app-text-2); }
+.pay-table tr:last-child td { border-bottom: none; }
+.pay-table__appt { color: var(--app-brand-600); font-weight: 500; font-variant-numeric: tabular-nums; }
+.pay-table__amount { color: var(--app-danger-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pay-table__time { color: var(--app-text-3); white-space: nowrap; }
+.empty { text-align: center; padding: var(--app-sp-6); color: var(--app-text-3); font-size: var(--app-fs-caption); }
+
 @media (max-width: 640px) {
   .form-row { flex-direction: column; gap: 0; }
   .col-fix { width: 100%; }
+  .pay-table { font-size: var(--app-fs-caption); }
 }
 </style>
