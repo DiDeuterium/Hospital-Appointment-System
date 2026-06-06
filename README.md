@@ -180,13 +180,13 @@ npm run dev
 ## 仓库主要文件
 
 ```
-├── README.md                         # 项目入口说明（本文件）
+├── README.md                         #   项目入口说明（本文件）
 ├── .gitignore
-├── sql/                              # 数据库脚本（独立维护版）
+├── sql/                              #   数据库脚本（独立维护版）
 │   ├── schema.sql                    #   建表 DDL（9表+2视图+索引）
 │   ├── data.sql                      #   测试数据
 │   └── queries.sql                   #   核心查询 SQL 示例
-├── docs/                             # 项目文档
+├── docs/                             #   项目文档
 │   ├── 项目需求说明.md                #   需求定义、角色、实体、关系、功能
 │   ├── 关系模式设计.md                #   ER 图→关系模式、范式分析
 │   ├── 数据库逻辑结构.md              #   表定义、约束、索引方案
@@ -199,7 +199,7 @@ npm run dev
 │   ├── 新增功能规划.md                #   新功能需求规划
 │   ├── 升级方案-数据库设计.md          #   数据库升级设计文档
 │   └── ER图.png                      #   ER 图
-├── backend/                          # Spring Boot 后端
+├── backend/                          #   Spring Boot 后端
 │   ├── pom.xml
 │   └── src/main/
 │       ├── java/com/hospital/        #   源码（按 controller/service/mapper/entity/dto 分层）
@@ -208,7 +208,7 @@ npm run dev
 │           ├── schema.sql            #   建表脚本（应用启动执行版）
 │           ├── data.sql              #   测试数据（应用启动执行版）
 │           └── static/avatars/       #   医生头像图片
-└── frontend/                         # Vue 3 前端
+└── frontend/                         #   Vue 3 前端
     ├── package.json
     ├── vite.config.js
     ├── .env.development / .env.production
